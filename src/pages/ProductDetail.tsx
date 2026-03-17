@@ -35,7 +35,8 @@ const ProductDetail = () => {
   const compareAt = variant?.compareAtPrice ? parseFloat(variant.compareAtPrice.amount) : null;
   const discount = compareAt && compareAt > price ? Math.round(((compareAt - price) / compareAt) * 100) : null;
   const imageUrl = product.images.edges[0]?.node?.url;
-  const currency = product.priceRange.minVariantPrice.currencyCode === 'INR' ? '\u20B9' : product.priceRange.minVariantPrice.currencyCode;
+  const currencyCode = product.priceRange.minVariantPrice.currencyCode;
+  const currency = currencyCode === 'INR' ? '₹' : currencyCode;
 
   const related = allProducts
     .filter(p => p.node.productType === product.productType && p.node.handle !== product.handle)
