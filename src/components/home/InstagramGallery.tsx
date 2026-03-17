@@ -1,11 +1,11 @@
 import { Instagram } from "lucide-react";
+import logo from "@/assets/logo.png";
 import product1 from "@/assets/product-1.jpg";
 import product2 from "@/assets/product-2.jpg";
 import product5 from "@/assets/product-5.jpg";
 import product6 from "@/assets/product-6.jpg";
 import catEarrings from "@/assets/cat-earrings.jpg";
 import catBangles from "@/assets/cat-bangles.jpg";
-import logo from "@/assets/logo.png";
 
 const images = [product1, product5, catEarrings, product2, catBangles, product6];
 
@@ -18,9 +18,26 @@ const InstagramGallery = () => (
         <Instagram className="w-4 h-4" /> @lalisabelle
       </p>
     </div>
+
+    {/* Embedded Instagram Reel */}
+    <div className="container flex justify-center mb-8">
+      <div className="w-full max-w-[400px] rounded-xl overflow-hidden shadow-lg">
+        <iframe
+          src="https://www.instagram.com/reel/DUqHzRgErhM/embed/"
+          className="w-full border-0"
+          height="520"
+          allowTransparency
+          allow="encrypted-media"
+          loading="lazy"
+          title="Lalisa Belle Instagram Reel"
+        />
+      </div>
+    </div>
+
+    {/* Image gallery */}
     <div className="grid grid-cols-3 md:grid-cols-6 gap-1">
       {images.map((img, i) => (
-        <a key={i} href="#" className="aspect-square overflow-hidden group relative">
+        <a key={i} href="https://www.instagram.com/lalisabelle/" target="_blank" rel="noopener noreferrer" className="aspect-square overflow-hidden group relative">
           <img src={img} alt="Instagram" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" />
           <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors flex items-center justify-center">
             <Instagram className="w-6 h-6 text-background opacity-0 group-hover:opacity-100 transition-opacity" />
