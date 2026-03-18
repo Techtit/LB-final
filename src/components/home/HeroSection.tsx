@@ -17,7 +17,7 @@ const HeroSection = () => (
           Discover stunning oxidized jewellery that looks premium without the premium price tag.
         </p>
         <div className="flex flex-wrap gap-3">
-          <Button asChild size="lg" className="font-sans tracking-wide shadow-lg bg-amber-400 hover:bg-amber-300 text-black border-0">
+          <Button asChild size="lg" className="font-sans tracking-wide shadow-lg bg-primary hover:bg-primary/90 text-primary-foreground border-0">
             <Link to="/shop?filter=bestsellers">Shop Best Sellers</Link>
           </Button>
         </div>
