@@ -8,7 +8,7 @@ import logo from "@/assets/logo.png";
 
 const navLinks = [
   { label: "Home", to: "/" },
-  { label: "Shop All", to: "/shop" },
+  { label: "All", to: "/shop" },
   { label: "Earrings", to: "/shop?category=Earrings" },
   { label: "Necklaces", to: "/shop?category=Necklaces" },
   { label: "Bangles", to: "/shop?category=Bangles" },
