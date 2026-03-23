@@ -13,6 +13,7 @@ import InstagramGallery from "@/components/home/InstagramGallery";
 const Index = () => (
   <>
     <HeroSection />
+    <ProductCarouselStrip />
     <PromoBanner />
     <AnimatedSection>
       <CategorySection />
