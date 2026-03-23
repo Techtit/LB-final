@@ -1,5 +1,6 @@
 import AnimatedSection from "@/components/AnimatedSection";
 import HeroSection from "@/components/home/HeroSection";
+import ProductCarouselStrip from "@/components/home/ProductCarouselStrip";
 import PromoBanner from "@/components/home/PromoBanner";
 import CategorySection from "@/components/home/CategorySection";
 import BestSellersSection from "@/components/home/BestSellersSection";
@@ -12,6 +13,7 @@ import InstagramGallery from "@/components/home/InstagramGallery";
 const Index = () => (
   <>
     <HeroSection />
+    <ProductCarouselStrip />
     <PromoBanner />
     <AnimatedSection>
       <CategorySection />
