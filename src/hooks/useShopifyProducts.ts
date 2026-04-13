@@ -1,39 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { fetchProducts, fetchProductByHandle, type ShopifyProduct } from '@/lib/shopify';
 
 export function useShopifyProducts(query?: string) {
-  const [products, setProducts] = useState<ShopifyProduct[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: products = [], isLoading, error } = useQuery({
+    queryKey: ['shopify-products', query || 'all'],
+    queryFn: () => fetchProducts(20, query),
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+  });
 
-  useEffect(() => {
-    let cancelled = false;
-    setIsLoading(true);
-    fetchProducts(20, query)
-      .then(data => { if (!cancelled) setProducts(data); })
-      .catch(err => { if (!cancelled) setError(err.message); })
-      .finally(() => { if (!cancelled) setIsLoading(false); });
-    return () => { cancelled = true; };
-  }, [query]);
-
-  return { products, isLoading, error };
+  return { products, isLoading, error: error?.message || null };
 }
 
 export function useShopifyProduct(handle: string | undefined) {
-  const [product, setProduct] = useState<ShopifyProduct['node'] | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: product = null, isLoading, error } = useQuery({
+    queryKey: ['shopify-product', handle],
+    queryFn: () => handle ? fetchProductByHandle(handle) : Promise.resolve(null),
+    enabled: !!handle,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+  });
 
-  useEffect(() => {
-    if (!handle) return;
-    let cancelled = false;
-    setIsLoading(true);
-    fetchProductByHandle(handle)
-      .then(data => { if (!cancelled) setProduct(data); })
-      .catch(err => { if (!cancelled) setError(err.message); })
-      .finally(() => { if (!cancelled) setIsLoading(false); });
-    return () => { cancelled = true; };
-  }, [handle]);
-
-  return { product, isLoading, error };
+  return { product, isLoading, error: error?.message || null };
 }

@@ -1,9 +1,15 @@
 import { toast } from "sonner";
+import { ConvexHttpClient } from "convex/browser";
+import { api } from "../../convex/_generated/api";
 
-const SHOPIFY_API_VERSION = '2025-07';
-const SHOPIFY_STORE_PERMANENT_DOMAIN = 'lalisa-belle-launch-7mqif.myshopify.com';
-const SHOPIFY_STOREFRONT_URL = `https://${SHOPIFY_STORE_PERMANENT_DOMAIN}/api/${SHOPIFY_API_VERSION}/graphql.json`;
-const SHOPIFY_STOREFRONT_TOKEN = 'dd21102043be8330365de1a8ead283be';
+/**
+ * ConvexHttpClient for calling Convex actions outside of React component trees
+ * (e.g. from the Zustand cart store). Uses the public Convex URL only —
+ * no secrets are shipped to the browser.
+ */
+const convexClient = new ConvexHttpClient(
+  import.meta.env.VITE_CONVEX_URL as string
+);
 
 export interface ShopifyProduct {
   node: {
@@ -61,32 +67,41 @@ export interface ShopifyProduct {
   };
 }
 
-export async function storefrontApiRequest(query: string, variables: Record<string, unknown> = {}) {
-  const response = await fetch(SHOPIFY_STOREFRONT_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Shopify-Storefront-Access-Token': SHOPIFY_STOREFRONT_TOKEN
-    },
-    body: JSON.stringify({ query, variables }),
+/**
+ * All Shopify requests flow through the Convex `shopify.storefrontProxy` action.
+ * The Storefront Access Token lives in Convex env vars, never in the browser.
+ */
+export async function storefrontApiRequest(
+  query: string,
+  variables: Record<string, unknown> = {}
+) {
+  const raw = await convexClient.action(api.shopify.storefrontProxy, {
+    query,
+    variables: JSON.stringify(variables),
   });
 
-  if (response.status === 402) {
-    toast.error("Shopify: Payment required", {
-      description: "Shopify API access requires an active billing plan. Visit https://admin.shopify.com to upgrade.",
-    });
-    return;
+  const parsed = JSON.parse(raw);
+
+  // Handle proxy-level HTTP errors
+  if (parsed._proxyError) {
+    if (parsed.status === 402) {
+      toast.error("Shopify: Payment required", {
+        description:
+          "Shopify API access requires an active billing plan. Visit https://admin.shopify.com to upgrade.",
+      });
+      return;
+    }
+    throw new Error(`HTTP error! status: ${parsed.status}`);
   }
 
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
+  // Handle GraphQL-level errors
+  if (parsed.errors) {
+    throw new Error(
+      `Shopify error: ${parsed.errors.map((e: { message: string }) => e.message).join(", ")}`
+    );
   }
 
-  const data = await response.json();
-  if (data.errors) {
-    throw new Error(`Shopify error: ${data.errors.map((e: { message: string }) => e.message).join(', ')}`);
-  }
-  return data;
+  return parsed;
 }
 
 const STOREFRONT_QUERY = `
@@ -209,12 +224,20 @@ const PRODUCT_BY_HANDLE_QUERY = `
   }
 `;
 
-export async function fetchProducts(first = 20, query?: string): Promise<ShopifyProduct[]> {
-  const data = await storefrontApiRequest(STOREFRONT_QUERY, { first, query: query || null });
+export async function fetchProducts(
+  first = 20,
+  query?: string
+): Promise<ShopifyProduct[]> {
+  const data = await storefrontApiRequest(STOREFRONT_QUERY, {
+    first,
+    query: query || null,
+  });
   return data?.data?.products?.edges || [];
 }
 
-export async function fetchProductByHandle(handle: string): Promise<ShopifyProduct['node'] | null> {
+export async function fetchProductByHandle(
+  handle: string
+): Promise<ShopifyProduct["node"] | null> {
   const data = await storefrontApiRequest(PRODUCT_BY_HANDLE_QUERY, { handle });
   return data?.data?.product || null;
 }
@@ -272,15 +295,21 @@ const CART_LINES_REMOVE_MUTATION = `
 function formatCheckoutUrl(checkoutUrl: string): string {
   try {
     const url = new URL(checkoutUrl);
-    url.searchParams.set('channel', 'online_store');
+    url.searchParams.set("channel", "online_store");
     return url.toString();
   } catch {
     return checkoutUrl;
   }
 }
 
-function isCartNotFoundError(userErrors: Array<{ field: string[] | null; message: string }>): boolean {
-  return userErrors.some(e => e.message.toLowerCase().includes('cart not found') || e.message.toLowerCase().includes('does not exist'));
+function isCartNotFoundError(
+  userErrors: Array<{ field: string[] | null; message: string }>
+): boolean {
+  return userErrors.some(
+    (e) =>
+      e.message.toLowerCase().includes("cart not found") ||
+      e.message.toLowerCase().includes("does not exist")
+  );
 }
 
 export interface CartItem {
@@ -293,13 +322,17 @@ export interface CartItem {
   selectedOptions: Array<{ name: string; value: string }>;
 }
 
-export async function createShopifyCart(item: CartItem): Promise<{ cartId: string; checkoutUrl: string; lineId: string } | null> {
+export async function createShopifyCart(
+  item: CartItem
+): Promise<{ cartId: string; checkoutUrl: string; lineId: string } | null> {
   const data = await storefrontApiRequest(CART_CREATE_MUTATION, {
-    input: { lines: [{ quantity: item.quantity, merchandiseId: item.variantId }] },
+    input: {
+      lines: [{ quantity: item.quantity, merchandiseId: item.variantId }],
+    },
   });
 
   if (data?.data?.cartCreate?.userErrors?.length > 0) {
-    console.error('Cart creation failed:', data.data.cartCreate.userErrors);
+    console.error("Cart creation failed:", data.data.cartCreate.userErrors);
     return null;
   }
 
@@ -309,44 +342,64 @@ export async function createShopifyCart(item: CartItem): Promise<{ cartId: strin
   const lineId = cart.lines.edges[0]?.node?.id;
   if (!lineId) return null;
 
-  return { cartId: cart.id, checkoutUrl: formatCheckoutUrl(cart.checkoutUrl), lineId };
+  return {
+    cartId: cart.id,
+    checkoutUrl: formatCheckoutUrl(cart.checkoutUrl),
+    lineId,
+  };
 }
 
-export async function addLineToShopifyCart(cartId: string, item: CartItem): Promise<{ success: boolean; lineId?: string; cartNotFound?: boolean }> {
+export async function addLineToShopifyCart(
+  cartId: string,
+  item: CartItem
+): Promise<{ success: boolean; lineId?: string; cartNotFound?: boolean }> {
   const data = await storefrontApiRequest(CART_LINES_ADD_MUTATION, {
     cartId,
     lines: [{ quantity: item.quantity, merchandiseId: item.variantId }],
   });
 
   const userErrors = data?.data?.cartLinesAdd?.userErrors || [];
-  if (isCartNotFoundError(userErrors)) return { success: false, cartNotFound: true };
+  if (isCartNotFoundError(userErrors))
+    return { success: false, cartNotFound: true };
   if (userErrors.length > 0) return { success: false };
 
   const lines = data?.data?.cartLinesAdd?.cart?.lines?.edges || [];
-  const newLine = lines.find((l: { node: { id: string; merchandise: { id: string } } }) => l.node.merchandise.id === item.variantId);
+  const newLine = lines.find(
+    (l: { node: { id: string; merchandise: { id: string } } }) =>
+      l.node.merchandise.id === item.variantId
+  );
   return { success: true, lineId: newLine?.node?.id };
 }
 
-export async function updateShopifyCartLine(cartId: string, lineId: string, quantity: number): Promise<{ success: boolean; cartNotFound?: boolean }> {
+export async function updateShopifyCartLine(
+  cartId: string,
+  lineId: string,
+  quantity: number
+): Promise<{ success: boolean; cartNotFound?: boolean }> {
   const data = await storefrontApiRequest(CART_LINES_UPDATE_MUTATION, {
     cartId,
     lines: [{ id: lineId, quantity }],
   });
 
   const userErrors = data?.data?.cartLinesUpdate?.userErrors || [];
-  if (isCartNotFoundError(userErrors)) return { success: false, cartNotFound: true };
+  if (isCartNotFoundError(userErrors))
+    return { success: false, cartNotFound: true };
   if (userErrors.length > 0) return { success: false };
   return { success: true };
 }
 
-export async function removeLineFromShopifyCart(cartId: string, lineId: string): Promise<{ success: boolean; cartNotFound?: boolean }> {
+export async function removeLineFromShopifyCart(
+  cartId: string,
+  lineId: string
+): Promise<{ success: boolean; cartNotFound?: boolean }> {
   const data = await storefrontApiRequest(CART_LINES_REMOVE_MUTATION, {
     cartId,
     lineIds: [lineId],
   });
 
   const userErrors = data?.data?.cartLinesRemove?.userErrors || [];
-  if (isCartNotFoundError(userErrors)) return { success: false, cartNotFound: true };
+  if (isCartNotFoundError(userErrors))
+    return { success: false, cartNotFound: true };
   if (userErrors.length > 0) return { success: false };
   return { success: true };
 }

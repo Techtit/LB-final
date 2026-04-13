@@ -9,14 +9,26 @@ import NewArrivals from "@/components/home/NewArrivals";
 import TrustIndicators from "@/components/home/TrustIndicators";
 import ReviewsSection from "@/components/home/ReviewsSection";
 import InstagramGallery from "@/components/home/InstagramGallery";
+import EntryPrompt from "@/components/home/EntryPrompt";
+import PremiumSection from "@/components/home/PremiumSection";
+
+import { Helmet } from "react-helmet-async";
 
 const Index = () => (
   <>
+    <Helmet>
+      <title>Lalisa Belle — Elegant Oxidized Jewellery</title>
+      <meta name="description" content="Discover stunning oxidized jewellery at affordable prices." />
+    </Helmet>
+    <EntryPrompt />
     <HeroSection />
     <ProductCarouselStrip />
     <PromoBanner />
     <AnimatedSection>
       <CategorySection />
+    </AnimatedSection>
+    <AnimatedSection>
+      <PremiumSection />
     </AnimatedSection>
     <AnimatedSection>
       <BestSellersSection />

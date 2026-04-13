@@ -56,14 +56,14 @@ const CartDrawer = () => {
                       <h4 className="text-sm font-medium truncate">{item.product.node.title}</h4>
                       <p className="text-sm font-semibold text-primary mt-1">{currency} {parseFloat(item.price.amount)}</p>
                       <div className="flex items-center gap-2 mt-2">
-                        <button onClick={() => updateQuantity(item.variantId, item.quantity - 1)} className="w-6 h-6 flex items-center justify-center rounded border border-border hover:bg-muted">
+                        <button onClick={() => updateQuantity(item.variantId, item.quantity - 1)} className="w-6 h-6 flex items-center justify-center rounded border border-border hover:bg-muted" aria-label="Decrease quantity">
                           <Minus className="w-3 h-3" />
                         </button>
                         <span className="text-sm w-6 text-center">{item.quantity}</span>
-                        <button onClick={() => updateQuantity(item.variantId, item.quantity + 1)} className="w-6 h-6 flex items-center justify-center rounded border border-border hover:bg-muted">
+                        <button onClick={() => updateQuantity(item.variantId, item.quantity + 1)} className="w-6 h-6 flex items-center justify-center rounded border border-border hover:bg-muted" aria-label="Increase quantity">
                           <Plus className="w-3 h-3" />
                         </button>
-                        <button onClick={() => removeItem(item.variantId)} className="ml-auto text-muted-foreground hover:text-destructive">
+                        <button onClick={() => removeItem(item.variantId)} className="ml-auto text-muted-foreground hover:text-destructive" aria-label="Remove item">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>

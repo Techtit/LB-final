@@ -1,10 +1,11 @@
 import { useParams, Link } from "react-router-dom";
 import { useShopifyProduct, useShopifyProducts } from "@/hooks/useShopifyProducts";
 import { useCartStore } from "@/stores/cartStore";
-import { useWishlistStore } from "@/stores/wishlistStore";
+import { useWishlist } from "@/hooks/useWishlist";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ProductCard";
 import { ShoppingBag, Truck, Shield, RotateCcw, Loader2, Heart, Flame } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 
 const ProductDetail = () => {
   const { handle } = useParams();
@@ -14,8 +15,8 @@ const ProductDetail = () => {
   const cartLoading = useCartStore(state => state.isLoading);
   const setIsCartOpen = useCartStore(state => state.setIsCartOpen);
 
-  const toggleWishlist = useWishlistStore(state => state.toggleItem);
-  const isWishlisted = useWishlistStore(state => state.isWishlisted(handle || ''));
+  const { toggle: toggleWishlist, isWishlisted: checkWishlisted } = useWishlist();
+  const isWishlisted = checkWishlisted(handle || '');
 
   if (isLoading) {
     return <div className="container py-20 flex justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
@@ -71,6 +72,10 @@ const ProductDetail = () => {
 
   return (
     <>
+      <Helmet>
+        <title>{product.title} | Lalisa Belle</title>
+        <meta name="description" content={product.description?.substring(0, 150) || `Buy ${product.title} at Lalisa Belle.`} />
+      </Helmet>
       <div className="container py-6 md:py-12">
         <nav className="text-xs text-muted-foreground mb-6 font-sans">
           <Link to="/" className="hover:text-primary">Home</Link>
@@ -103,10 +108,10 @@ const ProductDetail = () => {
             </div>
 
             <div className="flex items-baseline gap-3 mb-4">
-              <span className="text-2xl font-serif font-semibold">{currency}{price}</span>
+              <span className="text-2xl font-serif font-semibold"><span className="font-sans font-medium mr-[2px]">{currency}</span>{price}</span>
               {compareAt && compareAt > price && (
                 <>
-                  <span className="text-lg text-muted-foreground line-through">{currency}{compareAt}</span>
+                  <span className="text-lg text-muted-foreground line-through"><span className="font-sans mr-[2px]">{currency}</span>{compareAt}</span>
                   <span className="text-sm bg-primary/10 text-primary px-2 py-0.5 rounded font-medium">{discount}% off</span>
                 </>
               )}

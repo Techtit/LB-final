@@ -1,13 +1,13 @@
 import { Link } from "react-router-dom";
 import { Heart, Trash2, ArrowLeft } from "lucide-react";
-import { useWishlistStore } from "@/stores/wishlistStore";
+import { useWishlist } from "@/hooks/useWishlist";
 import { useShopifyProducts } from "@/hooks/useShopifyProducts";
 import ProductCard from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
 import AnimatedSection from "@/components/AnimatedSection";
 
 const Wishlist = () => {
-  const { items, clearWishlist } = useWishlistStore();
+  const { items, clearAll } = useWishlist();
   const { products } = useShopifyProducts();
 
   const wishlistedProducts = products.filter((p) => items.includes(p.node.handle));
@@ -23,7 +23,7 @@ const Wishlist = () => {
             <p className="text-muted-foreground text-sm font-sans mt-1">{items.length} saved item{items.length !== 1 ? "s" : ""}</p>
           </div>
           {items.length > 0 && (
-            <Button variant="ghost" size="sm" onClick={clearWishlist} className="text-muted-foreground hover:text-destructive">
+            <Button variant="ghost" size="sm" onClick={clearAll} className="text-muted-foreground hover:text-destructive">
               <Trash2 className="w-4 h-4 mr-1" /> Clear All
             </Button>
           )}

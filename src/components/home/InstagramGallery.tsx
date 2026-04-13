@@ -1,49 +1,70 @@
 import { Instagram } from "lucide-react";
 import logo from "@/assets/logo.png";
-import product1 from "@/assets/product-1.jpg";
-import product2 from "@/assets/product-2.jpg";
-import product5 from "@/assets/product-5.jpg";
-import product6 from "@/assets/product-6.jpg";
-import catEarrings from "@/assets/cat-earrings.jpg";
-import catBangles from "@/assets/cat-bangles.jpg";
 
-const images = [product1, product5, catEarrings, product2, catBangles, product6];
+// Real Lalisa Belle post IDs
+const postIds = [
+  "DR6l5z2j1Oi",
+  "DRy5OiNEqWK",
+  "DRoYlAVklFA",
+  "DOiTN-uEfZP",
+  "DVibhnXERcv"
+];
 
 const InstagramGallery = () => (
   <section className="py-16 md:py-20 bg-secondary/30">
-    <div className="container text-center mb-8">
+    <div className="container text-center mb-10">
       <img src={logo} alt="Lalisa Belle" className="h-8 mx-auto mb-3 opacity-20" />
       <h2 className="font-serif text-2xl md:text-3xl font-medium mb-2">Follow <span className="text-primary font-semibold">Lalisa Belle</span> on Instagram</h2>
-      <p className="text-muted-foreground font-sans text-sm flex items-center justify-center gap-1">
-        <Instagram className="w-4 h-4" /> @lalisabelle
-      </p>
+      <a href="https://www.instagram.com/lalisabelle9/?utm_source=ig_embed&ig_rid=4e1e7552-6bc0-4b5d-a3d0-3608ea96d937" target="_blank" rel="noopener noreferrer" className="text-muted-foreground font-sans text-sm flex items-center justify-center gap-2 hover:text-primary transition-colors">
+        <Instagram className="w-4 h-4" /> @lalisabelle9
+      </a>
     </div>
 
-    {/* Embedded Instagram Reel */}
-    <div className="container flex justify-center mb-8">
-      <div className="w-full max-w-[400px] rounded-xl overflow-hidden shadow-lg">
-        <iframe
-          src="https://www.instagram.com/reel/DUqHzRgErhM/embed/"
-          className="w-full border-0"
-          height="520"
-          allowTransparency
-          allow="encrypted-media"
-          loading="lazy"
-          title="Lalisa Belle Instagram Reel"
-        />
+    <div className="container">
+      <div className="grid lg:grid-cols-[400px_1fr] gap-8 items-start justify-center">
+        {/* Left Column: Embedded Instagram Reel */}
+        <div className="w-full max-w-[400px] mx-auto rounded-xl overflow-hidden shadow-lg bg-background border border-border">
+          <iframe
+            src="https://www.instagram.com/reel/DUqHzRgErhM/embed/"
+            className="w-full border-0"
+            height="520"
+            allowTransparency
+            allow="encrypted-media"
+            loading="lazy"
+            title="Lalisa Belle Instagram Reel"
+          />
+        </div>
+
+        {/* Right Column: Real Instagram Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
+          {postIds.map((id, i) => (
+            <div key={i} className="rounded-xl overflow-hidden shadow-sm bg-background border border-border flex items-center justify-center">
+              {/* Instagram restricts iframe sizing slightly, locking it to a min-width roughly 320px */}
+              <iframe
+                src={`https://www.instagram.com/p/${id}/embed`}
+                className="w-full max-w-[320px] md:max-w-full border-0"
+                height="400"
+                allowTransparency
+                allow="encrypted-media"
+                loading="lazy"
+                title={`Instagram Post ${i + 1}`}
+              />
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
-
-    {/* Image gallery */}
-    <div className="grid grid-cols-3 md:grid-cols-6 gap-1">
-      {images.map((img, i) => (
-        <a key={i} href="https://www.instagram.com/lalisabelle/" target="_blank" rel="noopener noreferrer" className="aspect-square overflow-hidden group relative">
-          <img src={img} alt="Instagram" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" />
-          <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors flex items-center justify-center">
-            <Instagram className="w-6 h-6 text-background opacity-0 group-hover:opacity-100 transition-opacity" />
-          </div>
+      
+      <div className="mt-12 text-center">
+        <a 
+          href="https://www.instagram.com/lalisabelle9/" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="inline-flex items-center gap-2 px-6 py-3 bg-foreground text-background font-sans font-medium rounded-full hover:bg-primary transition-colors"
+        >
+          <Instagram className="w-5 h-5" />
+          View Complete Gallery
         </a>
-      ))}
+      </div>
     </div>
   </section>
 );

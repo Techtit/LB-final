@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { ShoppingBag, Loader2, Flame, Eye, Heart } from "lucide-react";
 import { type ShopifyProduct } from "@/lib/shopify";
 import { useCartStore } from "@/stores/cartStore";
-import { useWishlistStore } from "@/stores/wishlistStore";
+import { useWishlist } from "@/hooks/useWishlist";
 import { useState, useEffect } from "react";
 
 interface ProductCardProps {
@@ -20,8 +20,8 @@ const ProductCard = ({ product }: ProductCardProps) => {
   const imageUrl = p.images.edges[0]?.node?.url;
   const currency = p.priceRange.minVariantPrice.currencyCode;
 
-  const toggleWishlist = useWishlistStore(state => state.toggleItem);
-  const isWishlisted = useWishlistStore(state => state.isWishlisted(p.handle));
+  const { toggle: toggleWishlist, isWishlisted: checkWishlisted } = useWishlist();
+  const isWishlisted = checkWishlisted(p.handle);
 
   // Simulated social proof
   const [viewers] = useState(() => Math.floor(Math.random() * 15) + 3);
