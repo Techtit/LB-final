@@ -23,8 +23,8 @@ const Footer = () => (
         <div>
           <h4 className="font-serif text-sm font-semibold mb-4 text-background">Quick Links</h4>
           <ul className="space-y-2 text-sm">
-            {["Shop All", "Earrings", "Necklaces", "Bangles", "Rings"].map((l) => (
-              <li key={l}><Link to="/shop" className="hover:text-primary transition-colors">{l}</Link></li>
+            {["Shop All", "Earrings", "Necklaces", "Bangle", "Rings", "Pets"].map((l) => (
+              <li key={l}><Link to={l === "Pets" ? "/shop?segment=Pets" : "/shop"} className="hover:text-primary transition-colors">{l}</Link></li>
             ))}
           </ul>
         </div>

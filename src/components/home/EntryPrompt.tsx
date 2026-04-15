@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { User, Store, Users, Baby } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { X } from "lucide-react";
 
 const EntryPrompt = () => {
   const [open, setOpen] = useState(false);
@@ -10,56 +9,66 @@ const EntryPrompt = () => {
   useEffect(() => {
     const hasSeenPrompt = sessionStorage.getItem("hasSeenEntryPrompt");
     if (!hasSeenPrompt) {
-      // Small delay for better UX
       const timer = setTimeout(() => setOpen(true), 1500);
       return () => clearTimeout(timer);
     }
   }, []);
+
+  const handleSelection = (category: string) => {
+    sessionStorage.setItem("selectedCategory", category);
+    sessionStorage.setItem("hasSeenEntryPrompt", "true");
+    
+    // Notify HeroSection to update its background immediately
+    window.dispatchEvent(new CustomEvent("lb-category-selected", { detail: category }));
+    
+    setOpen(false);
+  };
 
   const handleClose = () => {
     setOpen(false);
     sessionStorage.setItem("hasSeenEntryPrompt", "true");
   };
 
+  const categories = ["Women", "Men", "Kids", "Pets"];
+
   return (
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) handleClose(); }}>
-      <DialogContent className="sm:max-w-[320px] bg-background border-border pb-8">
-        <DialogHeader className="pt-4 pb-2">
-          <DialogTitle className="text-center font-serif text-2xl text-primary">Welcome</DialogTitle>
-          <DialogDescription className="text-center font-sans tracking-wide text-muted-foreground">
-            Select a collection to begin your journey
-          </DialogDescription>
-        </DialogHeader>
-        <div className="flex flex-col items-center justify-center gap-1 mt-4">
-          <Link 
-            to="/shop?segment=Women" 
-            onClick={handleClose} 
-            className="w-full text-center py-3 text-foreground hover:text-primary active:text-primary transition-colors text-xl font-serif tracking-wide"
+      <DialogContent className="sm:max-w-[420px] bg-background border-none p-0 overflow-hidden rounded-xl shadow-2xl">
+        <div className="relative bg-white p-8 md:p-12 flex flex-col items-center min-h-[500px]">
+          <button 
+            onClick={handleClose}
+            className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"
           >
-            Women
-          </Link>
-          <Link 
-            to="/shop?segment=Men" 
-            onClick={handleClose} 
-            className="w-full text-center py-3 text-foreground hover:text-primary active:text-primary transition-colors text-xl font-serif tracking-wide"
-          >
-            Men
-          </Link>
-          <Link 
-            to="/shop?segment=Kids" 
-            onClick={handleClose} 
-            className="w-full text-center py-3 text-foreground hover:text-primary active:text-primary transition-colors text-xl font-serif tracking-wide"
-          >
-            Kids
-          </Link>
-          <div className="w-2/3 h-px bg-border my-4"></div>
-          <Link 
-            to="/shop" 
-            onClick={handleClose} 
-            className="w-full text-center py-3 text-foreground hover:text-primary active:text-primary transition-colors text-base font-sans uppercase tracking-widest"
+            <X size={20} />
+          </button>
+
+          <div className="text-center mt-4 mb-2">
+            <h2 className="font-serif text-[42px] text-[#b88645] leading-tight mb-2">Welcome</h2>
+            <p className="font-sans text-muted-foreground text-sm tracking-wide">
+              Select a collection to begin your journey
+            </p>
+          </div>
+
+          <div className="flex flex-col items-center justify-center gap-6 mt-12 mb-10 w-full">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => handleSelection(cat)}
+                className="font-serif text-[32px] text-[#222] hover:text-[#b88645] transition-colors duration-300"
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
+          <div className="w-full h-[1px] bg-border/50 mb-8"></div>
+
+          <button
+            onClick={() => handleSelection("Women")} // Default to Women if general click
+            className="uppercase tracking-[0.2em] text-[#b88645] font-sans text-sm font-medium hover:opacity-80 transition-opacity"
           >
             Checkout the whole store
-          </Link>
+          </button>
         </div>
       </DialogContent>
     </Dialog>

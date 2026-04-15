@@ -16,6 +16,7 @@ const navLinks = [
   { label: "Rings", to: "/shop?category=Rings" },
   { label: "Hair Accessories", to: "/shop?category=Hair Accessories" },
   { label: "Premium", to: "/shop?category=Premium" },
+  { label: "Pets", to: "/shop?segment=Pets" },
 ];
 
 const Navbar = () => {

@@ -19,6 +19,7 @@ const segments = [
   { name: "Men", slug: "Men" },
   { name: "Women", slug: "Women" },
   { name: "Kids", slug: "Kids" },
+  { name: "Pets", slug: "Pets" },
 ];
 
 const Shop = () => {
