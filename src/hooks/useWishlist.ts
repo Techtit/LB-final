@@ -1,6 +1,7 @@
 import { useUser } from "@clerk/clerk-react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { toast } from "sonner";
 
 export function useWishlist() {
   const { user } = useUser();
@@ -11,14 +12,39 @@ export function useWishlist() {
   const toggleMutation = useMutation(api.wishlist.toggle);
   const clearAllMutation = useMutation(api.wishlist.clearAll);
 
-  const toggle = (productHandle: string) => {
-    if (!user) return;
-    toggleMutation({ productHandle });
+  const toggle = async (productHandle: string) => {
+    if (!user) {
+      toast.error("Sign in required", {
+        description: "Please log in to save items to your wishlist.",
+      });
+      return;
+    }
+
+    try {
+      const isCurrentlyWishlisted = items?.some(i => i.productHandle === productHandle);
+      
+      await toggleMutation({ productHandle });
+      
+      if (isCurrentlyWishlisted) {
+        toast.success("Removed from wishlist");
+      } else {
+        toast.success("Added to wishlist", {
+          description: "This item has been saved to your collection."
+        });
+      }
+    } catch (error) {
+      toast.error("Could not update wishlist");
+    }
   };
 
-  const clearAll = () => {
+  const clearAll = async () => {
     if (!user) return;
-    clearAllMutation({});
+    try {
+      await clearAllMutation({});
+      toast.success("Wishlist cleared");
+    } catch (error) {
+      toast.error("Failed to clear wishlist");
+    }
   };
 
   const isWishlisted = (handle: string) =>

@@ -17,6 +17,10 @@ const Shop = lazy(() => import("./pages/Shop"));
 const ProductDetail = lazy(() => import("./pages/ProductDetail"));
 const Wishlist = lazy(() => import("./pages/Wishlist"));
 const Auth = lazy(() => import("./pages/Auth"));
+const About = lazy(() => import("./pages/About"));
+const ShippingPolicy = lazy(() => import("./pages/ShippingPolicy"));
+const ReturnPolicy = lazy(() => import("./pages/ReturnPolicy"));
+const Contact = lazy(() => import("./pages/Contact"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -43,6 +47,10 @@ const AppContent = () => {
             <Route path="/product/:handle" element={<ProductDetail />} />
             <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/auth" element={isSignedIn ? <Navigate to="/" replace /> : <Auth />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/shipping-policy" element={<ShippingPolicy />} />
+            <Route path="/return-policy" element={<ReturnPolicy />} />
+            <Route path="/contact" element={<Contact />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
@@ -54,6 +62,7 @@ const AppContent = () => {
 
 import { ErrorBoundary } from "react-error-boundary";
 import { HelmetProvider } from "react-helmet-async";
+import ScrollToTop from "@/components/ScrollToTop";
 
 const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) => (
   <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-background text-foreground">
@@ -78,6 +87,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <ScrollToTop />
             <AppContent />
           </BrowserRouter>
         </TooltipProvider>

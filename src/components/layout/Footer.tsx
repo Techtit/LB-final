@@ -13,7 +13,7 @@ const Footer = () => (
             Affordable elegance for everyday style. Premium oxidized jewellery that won't break the bank.
           </p>
           <div className="flex gap-4 mt-4">
-            <a href="#" aria-label="Instagram" className="hover:text-primary transition-colors"><Instagram className="w-5 h-5" /></a>
+            <a href="https://instagram.com/lalisabelle" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="hover:text-primary transition-colors"><Instagram className="w-5 h-5" /></a>
             <a href="#" aria-label="Facebook" className="hover:text-primary transition-colors"><Facebook className="w-5 h-5" /></a>
             <a href="#" aria-label="Twitter" className="hover:text-primary transition-colors"><Twitter className="w-5 h-5" /></a>
           </div>
@@ -37,7 +37,6 @@ const Footer = () => (
             <li><Link to="/contact" className="hover:text-primary transition-colors">Contact</Link></li>
             <li><Link to="/shipping-policy" className="hover:text-primary transition-colors">Shipping Policy</Link></li>
             <li><Link to="/return-policy" className="hover:text-primary transition-colors">Return Policy</Link></li>
-            <li><Link to="/faq" className="hover:text-primary transition-colors">FAQ</Link></li>
           </ul>
         </div>
 

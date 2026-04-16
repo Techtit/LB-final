@@ -116,8 +116,15 @@ export const categories = [
 ] as const;
 
 export const reviews = [
-  { name: "Priya S.", text: "Absolutely love the quality! Looks way more expensive than it is. Got so many compliments! ✨", rating: 5 },
-  { name: "Ananya R.", text: "The jhumkas are gorgeous and so lightweight. Perfect for daily wear. Will order more!", rating: 5 },
-  { name: "Meera K.", text: "Fast shipping and beautiful packaging. The necklace is exactly as shown. Highly recommend!", rating: 5 },
-  { name: "Divya P.", text: "Best affordable jewellery I've found online. The oxidized finish is stunning!", rating: 4 },
+  { name: "Roopali", text: "Amazing collection, something that Gurgaon was missing. Such affordable pricing for an amazingly great quality jewellery. The gold and stainless steel jewellery looked like real ones.", rating: 5 },
+  { name: "Arvind", text: "Beautiful and well-curated collection. The designs are elegant, lightweight, and look very close to real jewellery. Especially impressed with the quality and finishing.", rating: 5 },
+  { name: "Khushboo Ahuja", text: "Very pretty designs! Loved the flower danglers. International level of designs and quality.", rating: 5 },
+  { name: "Ravi Kumar", text: "I'm really impressed with the quality! The designs are elegant and look just like real gold. It's lightweight, and perfect for daily wear.", rating: 5 },
+  { name: "Niharika Singhai", text: "Loved the collection in everyday anti-tarnish and loved the overall options! International level of designs and quality.", rating: 5 },
+  { name: "Divya Batra", text: "Good collection, good quality. Staff is also very humble. Highly recommended store!", rating: 5 },
+  { name: "Amugha Yepthomi", text: "Outstanding jewelry collection and exceptional service! The staff were friendly and knowledgeable.", rating: 5 },
+  { name: "Vinitoli Swu", text: "Stunning, with excellent craftsmanship and attention to detail. I'm thrilled with my purchase and would highly recommend to family.", rating: 5 },
+  { name: "Shalini Kharbanda", text: "V good collection of latest jewellery. Great designs and nominal price range.", rating: 5 },
+  { name: "Aakriti Chopra", text: "Gorgeous store and collection! Very sweet staff!", rating: 5 },
+  { name: "Pradhumn Maheshwari", text: "It’s affordable and good for gifting to your close ones. Great variety of artificial jewellery.", rating: 5 },
 ];
