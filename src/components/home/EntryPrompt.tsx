@@ -35,13 +35,6 @@ const EntryPrompt = () => {
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) handleClose(); }}>
       <DialogContent className="sm:max-w-[420px] bg-background border-none p-0 overflow-hidden rounded-xl shadow-2xl">
         <div className="relative bg-white p-8 md:p-12 flex flex-col items-center min-h-[500px]">
-          <button 
-            onClick={handleClose}
-            className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <X size={20} />
-          </button>
-
           <div className="text-center mt-4 mb-2">
             <h2 className="font-serif text-[42px] text-[#b88645] leading-tight mb-2">Welcome</h2>
             <p className="font-sans text-muted-foreground text-sm tracking-wide">

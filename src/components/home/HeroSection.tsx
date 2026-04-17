@@ -137,7 +137,7 @@ const HeroSection = () => {
       </div>
 
       {/* Content */}
-      <div className="container relative z-20 flex-1 flex flex-col justify-between md:justify-center pt-24 pb-8 md:py-0 mt-4 md:mt-0">
+      <div className="container relative z-20 flex-1 flex flex-col justify-start md:justify-center pt-24 pb-8 md:py-0 mt-4 md:mt-0">
         <div className="max-w-xl text-white">
           <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-medium leading-tight mb-4 drop-shadow-md">
              {currentCopy.title}
@@ -151,7 +151,7 @@ const HeroSection = () => {
           </motion.p>
         </div>
 
-        <div className="flex flex-wrap gap-4 mt-auto md:mt-8 pb-4 md:pb-0">
+        <div className="flex flex-wrap gap-4 mt-8 pb-4 md:pb-0">
           <Button
             asChild
             size="lg"

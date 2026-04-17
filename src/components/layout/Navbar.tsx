@@ -90,12 +90,22 @@ const Navbar = () => {
         {isMenuOpen && (
           <nav className="absolute top-full left-0 w-full md:w-72 bg-black/95 backdrop-blur-md border-b md:border-r border-white/10 shadow-2xl z-40 transition-all duration-300">
             <div className="flex flex-col py-4">
+              {/* Profile Link - PRIORITY #1 */}
+              <Link 
+                to="/profile" 
+                onClick={() => setIsMenuOpen(false)}
+                className="flex items-center gap-3 px-8 py-4 bg-amber-400/10 text-amber-300 font-serif text-lg border-l-4 border-amber-400 mb-2 hover:bg-amber-400/20 transition-all"
+              >
+                <User className="w-5 h-5" />
+                My Profile
+              </Link>
+
               {navLinks.map((link) => (
                 <Link key={link.label} to={link.to} onClick={() => setIsMenuOpen(false)} className="block px-8 py-3 text-sm md:text-base font-sans font-medium text-white/80 hover:text-amber-300 hover:bg-white/5 transition-colors border-l-2 border-transparent hover:border-amber-300">
                   {link.label}
                 </Link>
               ))}
-              {/* Wishlist in sidebar (only for mobile, or hidden on desktop if already in header) */}
+              {/* Wishlist in sidebar (only for mobile) */}
               <Link
                 to="/wishlist"
                 onClick={() => setIsMenuOpen(false)}
@@ -112,10 +122,14 @@ const Navbar = () => {
               {/* User auth in sidebar (mobile only) */}
               <div className="md:hidden border-t border-white/10 mt-2">
                 {user ? (
-                  <button onClick={() => { signOut(); setIsMenuOpen(false); }} className="w-full flex items-center gap-3 px-8 py-3 text-sm font-sans font-medium text-white/80 hover:text-amber-300 hover:bg-white/5 transition-colors">
-                    <LogOut className="w-4 h-4" />
-                    Sign Out
-                  </button>
+                  <Link 
+                    to="/profile" 
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex items-center gap-3 px-8 py-3 text-sm font-sans font-medium text-white/80 hover:text-amber-300 hover:bg-white/5 transition-colors"
+                  >
+                    <User className="w-4 h-4" />
+                    Account Settings
+                  </Link>
                 ) : (
                   <Link to="/auth" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 px-8 py-3 text-sm font-sans font-medium text-white/80 hover:text-amber-300 hover:bg-white/5 transition-colors">
                     <User className="w-4 h-4" />

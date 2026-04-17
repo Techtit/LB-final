@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as profile from "../profile.js";
 import type * as shopify from "../shopify.js";
 import type * as wishlist from "../wishlist.js";
 
@@ -18,6 +19,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  profile: typeof profile;
   shopify: typeof shopify;
   wishlist: typeof wishlist;
 }>;

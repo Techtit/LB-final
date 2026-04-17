@@ -21,6 +21,7 @@ const About = lazy(() => import("./pages/About"));
 const ShippingPolicy = lazy(() => import("./pages/ShippingPolicy"));
 const ReturnPolicy = lazy(() => import("./pages/ReturnPolicy"));
 const Contact = lazy(() => import("./pages/Contact"));
+const Profile = lazy(() => import("./pages/Profile"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -51,6 +52,7 @@ const AppContent = () => {
             <Route path="/shipping-policy" element={<ShippingPolicy />} />
             <Route path="/return-policy" element={<ReturnPolicy />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>

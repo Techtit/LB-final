@@ -2,9 +2,11 @@ import { useUser } from "@clerk/clerk-react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 export function useWishlist() {
   const { user } = useUser();
+  const navigate = useNavigate();
 
   // Auth is now handled server-side — no clerkUserId argument needed
   const items = useQuery(api.wishlist.getByUser, user ? {} : "skip");
@@ -16,6 +18,10 @@ export function useWishlist() {
     if (!user) {
       toast.error("Sign in required", {
         description: "Please log in to save items to your wishlist.",
+        action: {
+          label: "Sign In",
+          onClick: () => navigate("/auth"),
+        },
       });
       return;
     }
