@@ -47,7 +47,7 @@ const EntryPrompt = () => {
               <button
                 key={cat}
                 onClick={() => handleSelection(cat)}
-                className="font-serif text-[32px] text-[#222] hover:text-[#b88645] transition-colors duration-300"
+                className="font-serif text-[32px] text-[#222] hover:text-[#b88645] transition-colors duration-300 focus:outline-none"
               >
                 {cat}
               </button>
@@ -58,7 +58,7 @@ const EntryPrompt = () => {
 
           <button
             onClick={() => handleSelection("Women")} // Default to Women if general click
-            className="uppercase tracking-[0.2em] text-[#b88645] font-sans text-sm font-medium hover:opacity-80 transition-opacity"
+            className="uppercase tracking-[0.2em] text-[#b88645] font-sans text-sm font-medium hover:opacity-80 transition-opacity focus:outline-none"
           >
             Checkout the whole store
           </button>
