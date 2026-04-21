@@ -1,17 +1,18 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ShoppingBag, Loader2, Flame, Eye, Heart } from "lucide-react";
 import { type ShopifyProduct } from "@/lib/shopify";
 import { useCartStore } from "@/stores/cartStore";
 import { useWishlist } from "@/hooks/useWishlist";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 
 interface ProductCardProps {
   product: ShopifyProduct;
 }
 
 const ProductCard = ({ product }: ProductCardProps) => {
+  const navigate = useNavigate();
   const addItem = useCartStore(state => state.addItem);
   const isLoading = useCartStore(state => state.isLoading);
   const p = product.node;
@@ -26,6 +27,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
   const isWishlisted = checkWishlisted(p.handle);
 
   const [isInView, setIsInView] = useState(false);
+  const [forceShowMobile, setForceShowMobile] = useState(false);
   const [viewers] = useState(() => Math.floor(Math.random() * 15) + 3);
   const [sold] = useState(() => Math.floor(Math.random() * 40) + 10);
   const [added, setAdded] = useState(false);
@@ -58,14 +60,37 @@ const ProductCard = ({ product }: ProductCardProps) => {
     toggleWishlist(p.handle);
   };
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    // On mobile, if button is not visible, show it first
+    const isMobile = window.innerWidth < 768;
+    const isButtonVisible = isInView || forceShowMobile || added;
+
+    if (isMobile && !isButtonVisible) {
+      e.preventDefault();
+      setForceShowMobile(true);
+    } else {
+      // Allow normal Link navigation or programmatic navigate
+      // Link handles this automatically if e.preventDefault() isn't called,
+      // but if we are intercepting we might need to handle it.
+      // Since it's inside a Link, if we don't prevent default, it will navigate.
+    }
+  };
+
   return (
     <motion.div 
       className="group"
       onViewportEnter={() => setIsInView(true)}
-      onViewportLeave={() => setIsInView(false)}
-      viewport={{ amount: 0.6 }} // Higher threshold for mobile visibility
+      onViewportLeave={() => {
+        setIsInView(false);
+        setForceShowMobile(false); // Hide forced button when scrolled away
+      }}
+      viewport={{ margin: "-25% 0px -55% 0px" }} // Triggers for the "slightly higher than center" row
     >
-      <Link to={`/product/${p.handle}`} className="block relative overflow-hidden rounded-md bg-muted aspect-square mb-3">
+      <Link 
+        to={`/product/${p.handle}`} 
+        className="block relative overflow-hidden rounded-md bg-muted aspect-square mb-3"
+        onClick={handleCardClick}
+      >
         {imageUrl && (
           <img
             src={imageUrl}
@@ -78,11 +103,11 @@ const ProductCard = ({ product }: ProductCardProps) => {
         {/* Badges */}
         <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
           {discount && (
-            <span className="px-2 py-0.5 bg-destructive text-destructive-foreground text-[10px] font-bold tracking-wider rounded">
+            <span className="px-2 py-0.5 bg-destructive text-destructive-foreground text-[10px] font-bold tracking-wider rounded shadow-sm">
               {discount}% OFF
             </span>
           )}
-          <span className="px-2 py-0.5 bg-primary text-primary-foreground text-[10px] font-bold tracking-wider rounded flex items-center gap-1">
+          <span className="px-2 py-0.5 bg-primary text-primary-foreground text-[10px] font-bold tracking-wider rounded flex items-center gap-1 shadow-sm">
             <Flame className="w-3 h-3" /> SELLING FAST
           </span>
         </div>
@@ -101,14 +126,17 @@ const ProductCard = ({ product }: ProductCardProps) => {
           onClick={handleAddToCart}
           disabled={isLoading || !variant?.availableForSale}
           className={cn(
-            "absolute bottom-2 right-2 h-9 px-4 rounded-full flex items-center justify-center gap-1.5 transition-all duration-300 shadow-lg text-xs font-semibold font-sans z-30",
-            // Mobile: Visible when in center of screen
+            "absolute bottom-2 right-2 h-9 px-4 rounded-full flex items-center justify-center gap-1.5 transition-all duration-300 shadow-xl text-xs font-semibold font-sans z-30",
+            // Base state: Hidden
+            "opacity-0 pointer-events-none scale-90",
             // Desktop: Visible on hover
-            "opacity-0 pointer-events-none",
-            "md:group-hover:opacity-100 md:group-hover:pointer-events-auto",
-            isInView && "max-md:opacity-100 max-md:pointer-events-auto",
-            added && "bg-green-600 text-white opacity-100 pointer-events-auto",
-            !added && "bg-background/90 backdrop-blur-sm text-foreground hover:bg-primary hover:text-primary-foreground"
+            "md:group-hover:opacity-100 md:group-hover:pointer-events-auto md:group-hover:scale-100",
+            // Mobile: Visible when in focused scroll row OR when thumbnail is touched
+            (isInView || forceShowMobile) && "max-md:opacity-100 max-md:pointer-events-auto max-md:scale-100",
+            // State: Item added
+            added && "bg-green-600 text-white opacity-100 pointer-events-auto scale-100",
+            // Theme: Normal vs Hover
+            !added && "bg-background/95 backdrop-blur-sm text-foreground hover:bg-primary hover:text-primary-foreground border border-border/50"
           )}
           aria-label="Add to cart"
         >
@@ -117,9 +145,9 @@ const ProductCard = ({ product }: ProductCardProps) => {
       </Link>
 
       <Link to={`/product/${p.handle}`} className="block">
-        <h3 className="text-sm font-medium leading-tight mb-1 md:group-hover:text-primary transition-colors font-sans truncate">{p.title}</h3>
+        <h3 className="text-sm font-medium leading-tight mb-1 md:group-hover:text-primary transition-colors font-sans truncate px-0.5">{p.title}</h3>
       </Link>
-      <div className="flex items-center gap-2 mb-1">
+      <div className="flex items-center gap-2 mb-1 px-0.5">
         <span className="text-sm font-bold text-foreground">{currency === 'INR' ? '₹' : currency}{price}</span>
         {compareAt && compareAt > price && (
           <span className="text-xs text-muted-foreground line-through opacity-60">{currency === 'INR' ? '₹' : currency}{compareAt}</span>
@@ -129,8 +157,8 @@ const ProductCard = ({ product }: ProductCardProps) => {
         )}
       </div>
       {/* Social proof */}
-      <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-sans">
-        <span className="flex items-center gap-0.5"><Eye className="w-3 h-3" /> {viewers} viewing</span>
+      <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-sans px-0.5">
+        <span className="flex items-center gap-0.5"><Eye className="w-3 h-3 text-primary/70" /> {viewers} viewing</span>
         <span>•</span>
         <span>{sold} sold</span>
       </div>
