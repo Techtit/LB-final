@@ -184,7 +184,7 @@ const Profile = () => {
             <div className="text-center">
               <p className="text-stone-800 font-serif text-lg font-medium">No orders yet</p>
               <p className="text-stone-500 font-sans text-sm mt-1 mb-4">You haven't placed any orders yet.</p>
-              <Button asChild className="bg-stone-800 hover:bg-stone-900 text-white rounded-full px-8">
+              <Button asChild className="bg-[#b18146] hover:bg-amber-700 text-white rounded-full px-8">
                 <Link to="/shop">Start Shopping</Link>
               </Button>
             </div>
@@ -486,7 +486,7 @@ const Profile = () => {
                 key={item.id}
                 onClick={() => setActiveTab(item.id as TabType)}
                 className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all ${
-                  activeTab === item.id ? "bg-stone-900 text-white shadow-md" : "text-stone-600 hover:bg-stone-100"
+                  activeTab === item.id ? "bg-[#b18146] text-white shadow-md shadow-amber-900/10" : "text-stone-600 hover:bg-stone-100"
                 }`}
               >
                 <div className="flex items-center gap-3">
@@ -511,7 +511,7 @@ const Profile = () => {
                  key={item.id}
                  onClick={() => setActiveTab(item.id as TabType)}
                  className={`whitespace-nowrap px-4 py-2 text-sm font-sans font-medium rounded-full transition-colors ${
-                   activeTab === item.id ? "bg-stone-900 text-white" : "bg-stone-100 text-stone-600"
+                   activeTab === item.id ? "bg-[#b18146] text-white shadow-sm shadow-amber-900/10" : "bg-stone-100 text-stone-600"
                  }`}
                >
                  {item.label}
