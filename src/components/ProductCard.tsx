@@ -92,8 +92,8 @@ const ProductCard = ({ product }: ProductCardProps) => {
           disabled={isLoading || !variant?.availableForSale}
           className={`absolute bottom-2 right-2 h-9 px-3 rounded-full flex items-center justify-center gap-1.5 transition-all shadow-md text-xs font-semibold font-sans
             ${added
-              ? 'bg-green-600 text-white opacity-100'
-              : 'bg-background/90 backdrop-blur-sm opacity-0 group-hover:opacity-100 hover:bg-primary hover:text-primary-foreground'
+              ? 'bg-green-600 text-white opacity-100 pointer-events-auto'
+              : 'bg-background/90 backdrop-blur-sm opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto hover:bg-primary hover:text-primary-foreground'
             } disabled:opacity-50`}
           aria-label="Add to cart"
         >
