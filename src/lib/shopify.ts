@@ -127,7 +127,7 @@ const STOREFRONT_QUERY = `
               currencyCode
             }
           }
-          images(first: 5) {
+          images(first: 20) {
             edges {
               node {
                 url
@@ -187,7 +187,7 @@ const PRODUCT_BY_HANDLE_QUERY = `
           currencyCode
         }
       }
-      images(first: 5) {
+      images(first: 20) {
         edges {
           node {
             url

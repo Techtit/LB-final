@@ -94,9 +94,9 @@ const Navbar = () => {
               <Link 
                 to="/profile" 
                 onClick={() => setIsMenuOpen(false)}
-                className="flex items-center gap-3 px-8 py-4 bg-amber-400/10 text-amber-300 font-serif text-lg border-l-4 border-amber-400 mb-2 hover:bg-amber-400/20 transition-all"
+                className="flex items-center gap-3 px-8 py-3 text-sm md:text-base font-sans font-medium text-white/80 hover:text-amber-300 hover:bg-white/5 transition-colors border-l-2 border-transparent hover:border-amber-300"
               >
-                <User className="w-5 h-5" />
+                <User className="w-4 h-4" />
                 My Profile
               </Link>
 
