@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import { useAuth } from "@clerk/clerk-react";
 import { motion } from "framer-motion";
+import CategoryStripController from "./CategoryStripController";
 
 const categoryImages: Record<string, { src: string; pos?: string }[]> = {
   Women: [
@@ -151,7 +152,7 @@ const HeroSection = () => {
           </motion.p>
         </div>
 
-        <div className="flex flex-wrap gap-4 mt-8 pb-4 md:pb-0">
+        <div className="flex flex-wrap gap-4 mt-8 pb-4 md:pb-0 relative">
           <Button
             asChild
             size="lg"
@@ -159,6 +160,11 @@ const HeroSection = () => {
           >
             <Link to={`/shop?segment=${selectedCategory}`}>Shop Collection</Link>
           </Button>
+
+          {/* Absolute injected Category Strip */}
+          <div className="absolute top-[calc(100%-8px)] md:top-[calc(100%+8px)] left-1/2 -translate-x-1/2 w-screen z-30 pt-2 pointer-events-auto">
+            <CategoryStripController />
+          </div>
         </div>
       </div>
     </section>

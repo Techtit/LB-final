@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ShoppingBag, Menu, X, Search, Heart, User, LogOut } from "lucide-react";
 import { useUser, useClerk } from "@clerk/clerk-react";
@@ -7,27 +7,68 @@ import { useWishlist } from "@/hooks/useWishlist";
 import SearchOverlay from "./SearchOverlay";
 import logo from "@/assets/logo.png";
 
-const navLinks = [
-  { label: "Home", to: "/" },
-  { label: "All", to: "/shop" },
-  { label: "Earrings", to: "/shop?category=Earrings" },
-  { label: "Necklaces", to: "/shop?category=Necklaces" },
-  { label: "Bangles", to: "/shop?category=Bangles" },
-  { label: "Rings", to: "/shop?category=Rings" },
-  { label: "Hair Accessories", to: "/shop?category=Hair Accessories" },
-  { label: "Premium", to: "/shop?category=Premium" },
-  { label: "Pets", to: "/shop?segment=Pets" },
-];
+type Segment = "Women" | "Men" | "Kids" | "Pets";
+
+const categoryMap: Record<Segment, string[]> = {
+  Women: [
+    "Earrings",
+    "Necklaces",
+    "Bangles",
+    "Rings",
+    "Hair Accessories",
+    "Bracelets",
+    "Premium",
+  ],
+  Men: [
+    "Chains",
+    "Bracelets",
+    "Rings",
+    "Pendants",
+    "Premium",
+  ],
+  Kids: [
+    "Earrings",
+    "Bracelets",
+    "Necklaces",
+    "Rings",
+    "Hair Accessories",
+    "Premium",
+  ],
+  Pets: [
+    "Collars",
+    "Tags",
+    "Charms",
+    "Premium",
+  ],
+};
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [selectedSegment, setSelectedSegment] = useState<Segment>(() => {
+    return (sessionStorage.getItem("selectedCategory") as Segment) || "Women";
+  });
+
   const totalItems = useCartStore((state) => state.totalItems);
   const setIsCartOpen = useCartStore((state) => state.setIsCartOpen);
   const { items: wishlistItems } = useWishlist();
   const { user } = useUser();
   const { signOut } = useClerk();
   const count = totalItems();
+
+  // Sync segment from EntryPrompt custom event
+  useEffect(() => {
+    const handleCategoryChange = (e: any) => {
+      if (e.detail && categoryMap[e.detail as Segment]) {
+        setSelectedSegment(e.detail);
+      }
+    };
+
+    window.addEventListener("lb-category-selected", handleCategoryChange);
+    return () => window.removeEventListener("lb-category-selected", handleCategoryChange);
+  }, []);
+
+  const currentCategories = categoryMap[selectedSegment] || categoryMap.Women;
 
   return (
     <>
@@ -86,9 +127,9 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Dropdown Menu */}
+        {/* Dropdown/Side Menu */}
         {isMenuOpen && (
-          <nav className="absolute top-full left-0 w-full md:w-72 bg-black/95 backdrop-blur-md border-b md:border-r border-white/10 shadow-2xl z-40 transition-all duration-300">
+          <nav className="absolute top-full left-0 w-full md:w-72 bg-black/95 backdrop-blur-md border-b md:border-r border-white/10 shadow-2xl z-40 transition-all duration-300 max-h-[calc(100vh-64px)] overflow-y-auto">
             <div className="flex flex-col py-4">
               {/* Profile Link - PRIORITY #1 */}
               <Link 
@@ -100,11 +141,32 @@ const Navbar = () => {
                 My Profile
               </Link>
 
-              {navLinks.map((link) => (
-                <Link key={link.label} to={link.to} onClick={() => setIsMenuOpen(false)} className="block px-8 py-3 text-sm md:text-base font-sans font-medium text-white/80 hover:text-amber-300 hover:bg-white/5 transition-colors border-l-2 border-transparent hover:border-amber-300">
-                  {link.label}
+              {/* Standard Links */}
+              <Link to="/" onClick={() => setIsMenuOpen(false)} className="block px-8 py-3 text-sm md:text-base font-sans font-medium text-white/80 hover:text-amber-300 hover:bg-white/5 transition-colors border-l-2 border-transparent hover:border-amber-300">
+                Home
+              </Link>
+              <Link to="/shop" onClick={() => setIsMenuOpen(false)} className="block px-8 py-3 text-sm md:text-base font-sans font-medium text-white/80 hover:text-amber-300 hover:bg-white/5 transition-colors border-l-2 border-transparent hover:border-amber-300">
+                All Collections
+              </Link>
+
+              {/* Dynamic Segment Categories */}
+              <div className="mt-2 mb-1 px-8">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-[#b88645]/60 mb-2">
+                  {selectedSegment} Collection
+                </p>
+              </div>
+
+              {currentCategories.map((category) => (
+                <Link 
+                  key={category} 
+                  to={`/shop?segment=${selectedSegment}&category=${category}`} 
+                  onClick={() => setIsMenuOpen(false)} 
+                  className="block px-8 py-3 text-sm md:text-base font-sans font-medium text-white/80 hover:text-amber-300 hover:bg-white/5 transition-colors border-l-2 border-transparent hover:border-amber-300"
+                >
+                  {category}
                 </Link>
               ))}
+
               {/* Wishlist in sidebar (only for mobile) */}
               <Link
                 to="/wishlist"
@@ -119,6 +181,7 @@ const Navbar = () => {
                   </span>
                 )}
               </Link>
+
               {/* User auth in sidebar (mobile only) */}
               <div className="md:hidden border-t border-white/10 mt-2">
                 {user ? (

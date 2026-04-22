@@ -140,6 +140,9 @@ export const getCustomerOrders = action({
     }
 
     const data = await response.json();
+    if (data.errors) {
+      console.error("Shopify Admin GraphQL Errors:", JSON.stringify(data.errors, null, 2));
+    }
     return JSON.stringify(data);
   },
 });
