@@ -24,9 +24,8 @@ const CategorySelectorStrip = ({ category, onNext, onPrev, onClick }: Props) => 
     setTouchEnd(e.targetTouches[0].clientX);
   };
 
-  const onTouchEndHandler = () => {
+  const onTouchEndHandler = (e: React.TouchEvent) => {
     if (!touchStart || !touchEnd) {
-      if (onClick) onClick(); // Tap handled
       return;
     }
     const distance = touchStart - touchEnd;
@@ -35,11 +34,14 @@ const CategorySelectorStrip = ({ category, onNext, onPrev, onClick }: Props) => 
     
     if (isLeftSwipe) {
       onNext();
+      e.preventDefault(); // Preventive measure to stop click after swipe
     } else if (isRightSwipe) {
       onPrev();
-    } else {
-      if (onClick) onClick(); // Tap without sufficient swipe
+      e.preventDefault();
     }
+    // reset touches to prevent stale data
+    setTouchStart(null);
+    setTouchEnd(null);
   };
 
   return (
