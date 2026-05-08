@@ -4,7 +4,7 @@ import { fetchProducts, fetchProductByHandle, type ShopifyProduct } from '@/lib/
 export function useShopifyProducts(query?: string) {
   const { data: products = [], isLoading, error } = useQuery({
     queryKey: ['shopify-products', query || 'all'],
-    queryFn: () => fetchProducts(20, query),
+    queryFn: () => fetchProducts(250, query),
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 
