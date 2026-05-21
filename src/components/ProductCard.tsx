@@ -6,6 +6,7 @@ import { useWishlist } from "@/hooks/useWishlist";
 import { useState, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { motion, useInView } from "framer-motion";
+import { SafeImage } from "@/components/ui/SafeImage";
 
 interface ProductCardProps {
   product: ShopifyProduct;
@@ -92,7 +93,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
         onClick={handleCardClick}
       >
         {imageUrl && (
-          <img
+          <SafeImage
             src={imageUrl}
             alt={p.images.edges[0]?.node?.altText || p.title}
             className="w-full h-full object-cover md:group-hover:scale-105 transition-transform duration-500"

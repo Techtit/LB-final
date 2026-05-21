@@ -10,6 +10,10 @@ import { Loader2 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import CartDrawer from "@/components/layout/CartDrawer";
+import { AppErrorBoundary } from "@/components/error/AppErrorBoundary";
+import { RouteErrorBoundary } from "@/components/error/RouteErrorBoundary";
+import { HelmetProvider } from "react-helmet-async";
+import ScrollToTop from "@/components/ScrollToTop";
 
 // Code-split route components — each page becomes its own chunk
 const Index = lazy(() => import("./pages/Index"));
@@ -22,6 +26,7 @@ const ShippingPolicy = lazy(() => import("./pages/ShippingPolicy"));
 const ReturnPolicy = lazy(() => import("./pages/ReturnPolicy"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Profile = lazy(() => import("./pages/Profile"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -30,6 +35,13 @@ const PageLoader = () => (
   <div className="min-h-[60vh] flex items-center justify-center">
     <Loader2 className="w-8 h-8 animate-spin text-primary" />
   </div>
+);
+
+// Higher order component to wrap routes with the boundary
+const withRouteBoundary = (Component: React.ComponentType) => (
+  <RouteErrorBoundary>
+    <Component />
+  </RouteErrorBoundary>
 );
 
 const AppContent = () => {
@@ -43,17 +55,18 @@ const AppContent = () => {
       <main className="min-h-screen">
         <Suspense fallback={<PageLoader />}>
           <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/shop" element={<Shop />} />
-            <Route path="/product/:handle" element={<ProductDetail />} />
-            <Route path="/wishlist" element={<Wishlist />} />
-            <Route path="/auth" element={isSignedIn ? <Navigate to="/" replace /> : <Auth />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/shipping-policy" element={<ShippingPolicy />} />
-            <Route path="/return-policy" element={<ReturnPolicy />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="*" element={<NotFound />} />
+            <Route path="/" element={withRouteBoundary(Index)} />
+            <Route path="/shop" element={withRouteBoundary(Shop)} />
+            <Route path="/product/:handle" element={withRouteBoundary(ProductDetail)} />
+            <Route path="/wishlist" element={withRouteBoundary(Wishlist)} />
+            <Route path="/auth" element={isSignedIn ? <Navigate to="/" replace /> : withRouteBoundary(Auth)} />
+            <Route path="/about" element={withRouteBoundary(About)} />
+            <Route path="/shipping-policy" element={withRouteBoundary(ShippingPolicy)} />
+            <Route path="/return-policy" element={withRouteBoundary(ReturnPolicy)} />
+            <Route path="/privacy-policy" element={withRouteBoundary(PrivacyPolicy)} />
+            <Route path="/contact" element={withRouteBoundary(Contact)} />
+            <Route path="/profile" element={withRouteBoundary(Profile)} />
+            <Route path="*" element={withRouteBoundary(NotFound)} />
           </Routes>
         </Suspense>
       </main>
@@ -62,27 +75,8 @@ const AppContent = () => {
   );
 };
 
-import { ErrorBoundary } from "react-error-boundary";
-import { HelmetProvider } from "react-helmet-async";
-import ScrollToTop from "@/components/ScrollToTop";
-
-const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) => (
-  <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-background text-foreground">
-    <h2 className="text-2xl font-serif text-destructive mb-4">Something went wrong</h2>
-    <p className="text-sm text-muted-foreground bg-muted p-4 rounded-md mb-6 max-w-lg overflow-auto">
-      {error.message}
-    </p>
-    <button
-      onClick={resetErrorBoundary}
-      className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:opacity-90"
-    >
-      Try again
-    </button>
-  </div>
-);
-
 const App = () => (
-  <ErrorBoundary FallbackComponent={ErrorFallback} onReset={() => window.location.reload()}>
+  <AppErrorBoundary>
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
@@ -95,7 +89,7 @@ const App = () => (
         </TooltipProvider>
       </QueryClientProvider>
     </HelmetProvider>
-  </ErrorBoundary>
+  </AppErrorBoundary>
 );
 
 export default App;

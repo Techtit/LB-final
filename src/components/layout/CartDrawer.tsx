@@ -4,6 +4,8 @@ import { Minus, Plus, Trash2, ShoppingBag, ExternalLink, Loader2, Shield } from 
 import { useCartStore } from "@/stores/cartStore";
 import { useEffect } from "react";
 import logo from "@/assets/logo.png";
+import { SectionErrorBoundary } from "@/components/error/SectionErrorBoundary";
+import { SafeImage } from "@/components/ui/SafeImage";
 
 const CartDrawer = () => {
   const { items, isLoading, isSyncing, isCartOpen, setIsCartOpen, removeItem, updateQuantity, getCheckoutUrl, syncCart, totalItems, totalPrice } = useCartStore();
@@ -40,7 +42,8 @@ const CartDrawer = () => {
           </div>
         ) : (
           <>
-            {/* Urgency banner */}
+            <SectionErrorBoundary sectionName="Cart Items">
+              {/* Urgency banner */}
             <div className="bg-primary/10 border border-primary/20 rounded-md px-3 py-2 text-xs font-sans text-center text-primary font-medium">
               🔥 Items in your cart are selling fast! Complete your order now.
             </div>
@@ -51,7 +54,7 @@ const CartDrawer = () => {
                 const currency = item.price.currencyCode === 'INR' ? '₹' : item.price.currencyCode;
                 return (
                   <div key={item.variantId} className="flex gap-3 p-3 rounded-md bg-muted/50">
-                    {imgUrl && <img src={imgUrl} alt={item.product.node.title} className="w-20 h-20 object-cover rounded" />}
+                    {imgUrl && <SafeImage src={imgUrl} alt={item.product.node.title} className="w-20 h-20 object-cover rounded" />}
                     <div className="flex-1 min-w-0">
                       <h4 className="text-sm font-medium truncate">{item.product.node.title}</h4>
                       <p className="text-sm font-semibold text-primary mt-1">{currency} {parseFloat(item.price.amount)}</p>
@@ -88,6 +91,7 @@ const CartDrawer = () => {
               </div>
               <Button variant="outline" className="w-full" onClick={() => setIsCartOpen(false)}>Continue Shopping</Button>
             </div>
+            </SectionErrorBoundary>
           </>
         )}
       </SheetContent>

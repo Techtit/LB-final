@@ -131,7 +131,7 @@ const Navbar = () => {
         {isMenuOpen && (
           <nav className="absolute top-full left-0 w-full md:w-72 bg-black/95 backdrop-blur-md border-b md:border-r border-white/10 shadow-2xl z-40 transition-all duration-300 max-h-[calc(100vh-64px)] overflow-y-auto">
             <div className="flex flex-col py-4">
-              {/* Profile Link - PRIORITY #1 */}
+            {/* Profile Link - PRIORITY #1 */}
               <Link 
                 to="/profile" 
                 onClick={() => setIsMenuOpen(false)}
@@ -140,6 +140,33 @@ const Navbar = () => {
                 <User className="w-4 h-4" />
                 My Profile
               </Link>
+
+              {/* Segment Switcher */}
+              <div className="px-6 py-3 border-b border-white/10">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-[#b88645]/60 mb-2 px-2">
+                  Shopping For
+                </p>
+                <div className="flex gap-1.5 flex-wrap">
+                  {(["Women", "Men", "Kids", "Pets"] as Segment[]).map((seg) => (
+                    <button
+                      key={seg}
+                      onClick={() => {
+                        setSelectedSegment(seg);
+                        sessionStorage.setItem("selectedCategory", seg);
+                        sessionStorage.setItem("hasSeenEntryPrompt", "true");
+                        window.dispatchEvent(new CustomEvent("lb-category-selected", { detail: seg }));
+                      }}
+                      className={`px-3.5 py-1.5 rounded-full text-xs font-sans font-semibold tracking-wide transition-all duration-200 ${
+                        selectedSegment === seg
+                          ? "bg-[#b88645] text-black shadow-md shadow-amber-900/30"
+                          : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-amber-300 border border-white/10"
+                      }`}
+                    >
+                      {seg}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
               {/* Standard Links */}
               <Link to="/" onClick={() => setIsMenuOpen(false)} className="block px-8 py-3 text-sm md:text-base font-sans font-medium text-white/80 hover:text-amber-300 hover:bg-white/5 transition-colors border-l-2 border-transparent hover:border-amber-300">

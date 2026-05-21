@@ -8,6 +8,7 @@ import ProductCard from "@/components/ProductCard";
 import { ShoppingBag, Truck, Shield, RotateCcw, Loader2, Heart, Flame } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { cn } from "@/lib/utils";
+import { ProductGallery } from "@/components/ProductGallery";
 
 const ProductDetail = () => {
   const { handle } = useParams();
@@ -19,9 +20,6 @@ const ProductDetail = () => {
 
   const { toggle: toggleWishlist, isWishlisted: checkWishlisted } = useWishlist();
   const isWishlisted = checkWishlisted(handle || '');
-
-  const [activeImageIndex, setActiveImageIndex] = React.useState(0);
-  const [zoomStyle, setZoomStyle] = React.useState({ display: 'none', transformOrigin: '0% 0%' });
 
   if (isLoading) {
     return <div className="container py-20 flex justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
@@ -41,8 +39,6 @@ const ProductDetail = () => {
   const compareAt = variant?.compareAtPrice ? parseFloat(variant.compareAtPrice.amount) : null;
   const discount = compareAt && compareAt > price ? Math.round(((compareAt - price) / compareAt) * 100) : null;
   const images = product.images.edges.map(edge => edge.node);
-  const activeImage = images[activeImageIndex] || images[0];
-  const imageUrl = activeImage?.url;
   const currencyCode = product.priceRange.minVariantPrice.currencyCode;
   const currency = currencyCode === 'INR' ? '₹' : currencyCode;
 
@@ -77,20 +73,6 @@ const ProductDetail = () => {
     if (checkoutUrl) window.open(checkoutUrl, '_blank');
   };
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - left) / width) * 100;
-    const y = ((e.clientY - top) / height) * 100;
-    setZoomStyle({
-      display: 'block',
-      transformOrigin: `${x}% ${y}%`,
-    });
-  };
-
-  const handleMouseLeave = () => {
-    setZoomStyle({ display: 'none', transformOrigin: '0% 0%' });
-  };
-
   return (
     <>
       <Helmet>
@@ -108,55 +90,7 @@ const ProductDetail = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start">
           <div className="flex flex-col gap-4">
-            {/* Main Image Container */}
-            <div 
-              className="relative aspect-square rounded-xl overflow-hidden bg-muted cursor-zoom-in group border border-border/50"
-              onMouseMove={handleMouseMove}
-              onMouseLeave={handleMouseLeave}
-            >
-              {imageUrl && (
-                <>
-                  <img 
-                    src={imageUrl} 
-                    alt={product.title} 
-                    className="w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-0" 
-                  />
-                  <div 
-                    className="absolute inset-0 w-full h-full bg-no-repeat pointer-events-none transition-transform duration-200"
-                    style={{
-                      backgroundImage: `url(${imageUrl})`,
-                      backgroundSize: '250%',
-                      backgroundPosition: zoomStyle.transformOrigin,
-                      display: zoomStyle.display,
-                    }}
-                  />
-                </>
-              )}
-              
-              {discount && (
-                <span className="absolute top-4 left-4 px-3 py-1 bg-destructive text-destructive-foreground text-[10px] font-bold tracking-widest uppercase rounded shadow-lg z-10 backdrop-blur-sm">
-                  {discount}% OFF
-                </span>
-              )}
-            </div>
-
-            {/* Thumbnails */}
-            {images.length > 1 && (
-              <div className="flex gap-2 pb-2 overflow-x-auto scrollbar-hide">
-                {images.map((img, idx) => (
-                  <button
-                    key={`${img.url}-${idx}`}
-                    onClick={() => setActiveImageIndex(idx)}
-                    className={cn(
-                      "relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all duration-200",
-                      activeImageIndex === idx ? "border-primary shadow-md opacity-100" : "border-transparent opacity-60 hover:opacity-100 hover:border-border"
-                    )}
-                  >
-                    <img src={img.url} alt={`${product.title} ${idx + 1}`} className="w-full h-full object-cover" />
-                  </button>
-                ))}
-              </div>
-            )}
+            <ProductGallery images={images} title={product.title} discount={discount} />
           </div>
 
           <div className="flex flex-col">
