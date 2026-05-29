@@ -28,21 +28,52 @@ const Shop = () => {
   const maxPrice = searchParams.get("maxPrice");
   const segment = searchParams.get("segment");
 
-  // Build Shopify search query
-  const shopifyQuery = useMemo(() => {
-    const parts: string[] = [];
-    if (category) parts.push(`product_type:${category}`);
-    if (segment) parts.push(`tag:${segment}`); // Using tags for Men/Women/Kids
-    return parts.join(' AND ') || undefined;
-  }, [category, segment]);
+  // Fetch ALL products (up to 250) so we can do smart filtering on the client
+  const { products, isLoading } = useShopifyProducts();
 
-  const { products, isLoading } = useShopifyProducts(shopifyQuery);
-
-  // Client-side price filter
+  // Client-side semantic filter
   const filtered = useMemo(() => {
-    if (!maxPrice) return products;
-    return products.filter(p => parseFloat(p.node.priceRange.minVariantPrice.amount) <= Number(maxPrice));
-  }, [products, maxPrice]);
+    let result = products;
+
+    // 1. Semantic Category Match (e.g. "Earrings")
+    if (category) {
+      const catLower = category.toLowerCase();
+      result = result.filter(p => {
+        const node = p.node;
+        const pType = node.productType?.toLowerCase() || '';
+        const title = node.title?.toLowerCase() || '';
+        const tags = node.tags || [];
+        const description = node.descriptionHtml?.toLowerCase() || '';
+        
+        return pType === catLower || 
+               title.includes(catLower) || 
+               tags.some(t => t.toLowerCase() === catLower) ||
+               description.includes(catLower);
+      });
+    }
+
+    // 2. Semantic Segment Match (e.g. "Women", "Men")
+    if (segment) {
+      const segLower = segment.toLowerCase();
+      result = result.filter(p => {
+        const node = p.node;
+        const title = node.title?.toLowerCase() || '';
+        const tags = node.tags || [];
+        const description = node.descriptionHtml?.toLowerCase() || '';
+        
+        return title.includes(segLower) || 
+               tags.some(t => t.toLowerCase() === segLower) ||
+               description.includes(segLower);
+      });
+    }
+
+    // 3. Price Filter (e.g. "Under ₹199")
+    if (maxPrice) {
+      result = result.filter(p => parseFloat(p.node.priceRange.minVariantPrice.amount) <= Number(maxPrice));
+    }
+
+    return result;
+  }, [products, category, segment, maxPrice]);
 
   const createQueryString = (name: string, value: string) => {
     const params = new URLSearchParams(searchParams);
