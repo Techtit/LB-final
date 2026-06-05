@@ -138,9 +138,10 @@ const ProductDetail = () => {
             </div>
 
             <div className="space-y-6 mb-8">
-              <div className="prose prose-sm font-sans text-foreground/70 leading-relaxed">
-                <p>{product.description}</p>
-              </div>
+              <div 
+                className="prose prose-sm font-sans text-foreground/70 leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: product.descriptionHtml || product.description }}
+              />
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col p-3 rounded-lg bg-muted/30 border border-border/40">

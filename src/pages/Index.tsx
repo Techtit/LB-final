@@ -16,8 +16,8 @@ import { Helmet } from "react-helmet-async";
 const Index = () => (
   <>
     <Helmet>
-      <title>Lalisa Belle — Elegant Oxidized Jewellery</title>
-      <meta name="description" content="Discover stunning oxidized jewellery at affordable prices." />
+      <title>Lalisa Belle - Premium Imitation Jewellery</title>
+      <meta name="description" content="Discover stunning premium imitation jewellery at affordable prices." />
     </Helmet>
     <HeroSection />
     <ProductCarouselStrip />

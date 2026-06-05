@@ -16,6 +16,7 @@ export interface ShopifyProduct {
     id: string;
     title: string;
     description: string;
+    descriptionHtml: string;
     handle: string;
     productType: string;
     tags: string[];
@@ -112,6 +113,7 @@ const STOREFRONT_QUERY = `
           id
           title
           description
+          descriptionHtml
           handle
           productType
           tags
@@ -172,6 +174,7 @@ const PRODUCT_BY_HANDLE_QUERY = `
       id
       title
       description
+      descriptionHtml
       handle
       productType
       tags
