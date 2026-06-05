@@ -80,7 +80,6 @@ const Contact = () => {
                   Experience the luxury look of Lalisa Belle in person. Explore our entire collection of imitation and artificial jewellery in our Gurgaon showroom.
                 </p>
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-lg border border-white/20 text-sm">
-                  <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
                   Open Monday - Sunday: 11 AM - 9:30 PM
                 </div>
               </div>

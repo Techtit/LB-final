@@ -133,7 +133,7 @@ const ProductDetail = () => {
                 <Flame className="w-4 h-4 fill-primary/20" /> Selling fast
               </span>
               <span className="text-muted-foreground flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" /> 8 people have this in their cart
+                8 people have this in their cart
               </span>
             </div>
 
