@@ -22,11 +22,15 @@ const CategorySection = () => {
   const getCategoryImage = (catName: string, defaultImage: string) => {
     if (!products || products.length === 0) return defaultImage;
     if (catName === "Earrings" || catName === "Bangles") {
+      const searchStr = catName.toLowerCase();
+      // Look for any product that has the category in its type, tags, title, or handle
       const product = products.find(p => 
-        p.node.productType?.toLowerCase() === catName.toLowerCase() || 
-        p.node.tags?.map(t => t.toLowerCase()).includes(catName.toLowerCase())
+        p.node.productType?.toLowerCase().includes(searchStr) || 
+        p.node.tags?.some(t => t.toLowerCase().includes(searchStr)) ||
+        p.node.title?.toLowerCase().includes(searchStr) ||
+        p.node.handle?.toLowerCase().includes(searchStr)
       );
-      if (product && product.node.images.edges.length > 0) {
+      if (product && product.node.images?.edges?.length > 0) {
         return product.node.images.edges[0].node.url;
       }
     }
