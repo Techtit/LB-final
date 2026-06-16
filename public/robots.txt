@@ -1,8 +1,15 @@
+# Lalisa Belle — https://lalisabelle.com
+# Robots.txt
+
 User-agent: Googlebot
 Allow: /
+Disallow: /auth
+Disallow: /profile
 
 User-agent: Bingbot
 Allow: /
+Disallow: /auth
+Disallow: /profile
 
 User-agent: Twitterbot
 Allow: /
@@ -12,3 +19,7 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /auth
+Disallow: /profile
+
+Sitemap: https://lalisabelle.com/sitemap.xml
