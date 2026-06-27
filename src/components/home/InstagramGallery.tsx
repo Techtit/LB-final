@@ -28,7 +28,7 @@ const InstagramGallery = () => (
             src="https://www.instagram.com/reel/DUqHzRgErhM/embed/"
             className="w-full border-0"
             height="520"
-            allowTransparency
+            allowtransparency="true"
             allow="encrypted-media"
             loading="lazy"
             title="Lalisa Belle Instagram Reel"
@@ -44,7 +44,7 @@ const InstagramGallery = () => (
                 src={`https://www.instagram.com/p/${id}/embed`}
                 className="w-full max-w-[320px] md:max-w-full border-0"
                 height="400"
-                allowTransparency
+                allowtransparency="true"
                 allow="encrypted-media"
                 loading="lazy"
                 title={`Instagram Post ${i + 1}`}

@@ -9,23 +9,23 @@ import { siteConfig, getFullAddress } from "@/config/site";
 const features = [
   {
     icon: IndianRupee,
-    title: "Affordable Pricing",
-    description: "Premium looks without the premium price",
+    title: "Premium Quality, Honest Prices",
+    description: "Pieces that look luxurious, feel lightweight, and last.",
   },
   {
     icon: Sparkles,
-    title: "Premium Finish",
-    description: "Durable finishes that last through daily wear",
+    title: "Curated With Love",
+    description: "Every single piece is hand-picked by us.",
   },
   {
     icon: Feather,
-    title: "Lightweight & Comfy",
-    description: "Designed for all-day comfortable wear",
+    title: "For Every Occasion",
+    description: "Monday morning office or Saturday wedding, we have the perfect piece.",
   },
   {
     icon: ShieldCheck,
-    title: "Skin-Friendly",
-    description: "Safe materials gentle on all skin types",
+    title: "Made for Indian Women",
+    description: "From oxidised ethnic pieces to contemporary fusion styles.",
   },
 ] as const;
 
@@ -58,8 +58,8 @@ const About = () => {
       <StructuredData data={localBusinessSchema} />
 
       {/* ─── 1. Hero Banner ─── */}
-      <section className="pt-24 pb-16 min-h-screen bg-background flex items-center">
-        <div className="container max-w-4xl px-4 mx-auto text-center">
+      <section className="pt-32 pb-16 bg-background">
+        <div className="container max-w-5xl px-4 mx-auto text-center">
           <AnimatedSection>
             <h1 className="font-serif text-4xl md:text-5xl font-medium tracking-tight text-[#b88645] mb-6">
               About Lalisa Belle
@@ -67,7 +67,15 @@ const About = () => {
             <p className="text-lg md:text-xl text-muted-foreground font-sans max-w-2xl mx-auto mb-8">
               Premium Imitation Jewellery — Affordable Elegance, Curated With Love
             </p>
-            <div className="w-24 h-1 bg-[#b88645]/30 mx-auto" />
+            <div className="w-24 h-1 bg-[#b88645]/30 mx-auto mb-12" />
+            
+            <div className="w-full rounded-2xl overflow-hidden aspect-[21/9] relative bg-muted border border-border/50">
+              <img 
+                src="/about-us-hero.webp" 
+                alt="Lalisa Belle - Our Story" 
+                className="w-full h-full object-cover"
+              />
+            </div>
           </AnimatedSection>
         </div>
       </section>
@@ -78,30 +86,15 @@ const About = () => {
           <AnimatedSection>
             <h2 className="font-serif text-2xl text-foreground mb-4">Our Story</h2>
 
-            <blockquote className="text-lg text-muted-foreground leading-relaxed italic border-l-4 border-[#b88645] pl-6 py-2 mb-8">
-              "Lalisa Belle offers a stunning collection of premium imitation jewellery that
-              blends elegance with affordability."
-            </blockquote>
-
             <div className="space-y-6 text-foreground/80 leading-relaxed text-lg font-sans">
               <p>
-                Founded with a passion for making luxury accessible, Lalisa Belle brings you
-                beautifully crafted imitation jewellery designed to make every moment shine.
-                We believe that style shouldn't come with a steep price tag — and our
-                collections prove exactly that.
+                Lalisa Belle was born from a simple belief: every woman deserves to feel beautiful — without breaking the bank.
               </p>
               <p>
-                From traditional ethnic designs to modern chic styles, our curated pieces are
-                perfect for weddings, parties, everyday wear, and gifting. Each piece is
-                selected with care, keeping quality, comfort, and current trends in mind.
+                What started as a passion for stunning jewellery became a boutique nestled in the heart of M3M 65th Avenue, Gurugram. Every piece on our shelves is hand-picked with love — if it does not meet our standard, it does not make it to the shelf.
               </p>
               <p>
-                Crafted with precision and made to last, our jewellery gives you the luxury
-                look without the premium price. That's our promise — affordable elegance,
-                curated with love.
-              </p>
-              <p className="font-serif text-2xl text-[#b88645] pt-4">
-                Sparkle in style — without compromise!
+                Now we are bringing that same carefully curated experience to you online.
               </p>
             </div>
           </AnimatedSection>
@@ -113,13 +106,10 @@ const About = () => {
         <div className="container max-w-4xl px-4 mx-auto">
           <AnimatedSection delay={0.1}>
             <h2 className="font-serif text-2xl text-foreground mb-4 text-center">
-              Why Choose Lalisa Belle
+              Why Lalisa Belle?
             </h2>
-            <p className="text-muted-foreground text-center mb-12 max-w-xl mx-auto font-sans">
-              Four reasons our customers keep coming back for more.
-            </p>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-12">
               {features.map((feature, i) => (
                 <motion.div
                   key={feature.title}
@@ -150,20 +140,17 @@ const About = () => {
         <div className="container max-w-4xl px-4 mx-auto">
           <AnimatedSection delay={0.1}>
             <div className="bg-[#222] rounded-3xl p-8 md:p-12 text-white">
-              <h2 className="font-serif text-2xl text-white mb-6">Visit Our Store</h2>
+              <h2 className="font-serif text-2xl text-white mb-6">Visit Us</h2>
 
               <div className="space-y-4 text-white/80 font-sans leading-relaxed">
-                <p className="text-lg font-medium text-white">
-                  {siteConfig.store.name}
+                <p className="flex items-center gap-2">
+                  <span className="text-xl">📍</span>
+                  Lalisa Belle, M3M 65th Avenue, Sector 65, Gurugram, Haryana
                 </p>
-                <p>{getFullAddress()}</p>
-                <p className="italic text-white/60">
-                  {siteConfig.store.address.landmark}
-                </p>
-                <p>
-                  <span className="text-[#b88645] font-medium">Hours:</span>{" "}
-                  {siteConfig.store.hours}
-                </p>
+                <div className="pt-4">
+                  <p>With love,</p>
+                  <p>The Lalisa Belle Team 💕</p>
+                </div>
               </div>
 
               <Link

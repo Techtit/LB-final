@@ -88,10 +88,10 @@ export const ProductGallery = ({ images, title, discount }: ProductGalleryProps)
     <div className="flex flex-col gap-4">
       {/* Main Image Carousel */}
       <div className="relative aspect-square rounded-xl overflow-hidden bg-muted border border-border/50">
-        <Carousel setApi={setApi} className="w-full h-full">
+        <Carousel setApi={setApi} className="w-full h-full [&_.overflow-hidden]:h-full">
           <CarouselContent className="w-full h-full ml-0">
             {images.map((img, idx) => (
-              <CarouselItem key={`${img.url}-${idx}`} className="w-full h-full pl-0 relative">
+              <CarouselItem key={`${img.url}-${idx}`} className="w-full h-full pl-0 relative flex items-center justify-center">
                 <ZoomableImage src={img.url} alt={img.altText || `${title} ${idx + 1}`} isActive={idx === current} />
               </CarouselItem>
             ))}

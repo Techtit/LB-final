@@ -68,6 +68,18 @@ const Navbar = () => {
     return () => window.removeEventListener("lb-category-selected", handleCategoryChange);
   }, []);
 
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMenuOpen]);
+
   const currentCategories = categoryMap[selectedSegment] || categoryMap.Women;
 
   return (
@@ -129,8 +141,17 @@ const Navbar = () => {
 
         {/* Dropdown/Side Menu */}
         {isMenuOpen && (
-          <nav className="absolute top-full left-0 w-full md:w-72 bg-black/95 backdrop-blur-md border-b md:border-r border-white/10 shadow-2xl z-40 transition-all duration-300 max-h-[calc(100vh-64px)] overflow-y-auto">
-            <div className="flex flex-col py-4">
+          <>
+            {/* Overlay to intercept clicks and prevent background touch */}
+            <div 
+              className="fixed inset-0 top-16 md:top-24 bg-black/50 z-30 touch-none"
+              onClick={() => setIsMenuOpen(false)}
+            />
+            <nav 
+              className="absolute top-full left-0 w-full md:w-72 bg-black/95 backdrop-blur-md border-b md:border-r border-white/10 shadow-2xl z-40 transition-all duration-300 h-[calc(100vh-64px)] md:h-[calc(100vh-96px)] overflow-y-auto overscroll-contain touch-pan-y"
+              style={{ WebkitOverflowScrolling: "touch" }}
+            >
+              <div className="flex flex-col py-4">
             {/* Profile Link - PRIORITY #1 */}
               <Link 
                 to="/profile" 
@@ -228,7 +249,8 @@ const Navbar = () => {
                 )}
               </div>
             </div>
-          </nav>
+            </nav>
+          </>
         )}
       </header>
       <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />

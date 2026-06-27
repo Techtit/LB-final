@@ -51,12 +51,12 @@ const Contact = () => {
       <div className="container max-w-5xl">
         {/* ─── Header ─── */}
         <AnimatedSection>
-          <div className="text-center mb-16">
+          <div className="text-center mb-16 max-w-3xl mx-auto">
             <h1 className="font-serif text-4xl md:text-5xl text-[#b88645] mb-4">
               Contact Us
             </h1>
-            <p className="text-muted-foreground font-sans tracking-wide">
-              We'd love to hear from you or see you at our store.
+            <p className="text-muted-foreground font-sans tracking-wide leading-relaxed">
+              We would love to hear from you! Whether you have a question about an order, need help choosing the right piece, or just want to say hello — we are here. 💕
             </p>
           </div>
         </AnimatedSection>
@@ -66,10 +66,13 @@ const Contact = () => {
           <div className="bg-gradient-to-r from-[#25D366] to-[#128C7E] rounded-2xl p-8 text-white mb-12 flex flex-col md:flex-row items-center justify-between gap-6">
             <div>
               <h2 className="font-serif text-2xl md:text-3xl mb-2">
-                Chat with us instantly
+                Chat with us on WhatsApp
               </h2>
-              <p className="text-white/80 font-sans">
-                Get quick replies about orders, products, and more.
+              <p className="text-white/90 font-sans mb-1">
+                Fastest response, within 1-2 hours.
+              </p>
+              <p className="text-white/80 font-sans text-sm">
+                Share your Order ID on WhatsApp for the fastest support.
               </p>
             </div>
             <a
@@ -108,10 +111,13 @@ const Contact = () => {
               <h3 className="font-serif text-xl mb-2">Email Us</h3>
               <a
                 href={getEmailUrl()}
-                className="font-sans text-foreground hover:text-[#b88645] transition-colors"
+                className="font-sans text-foreground hover:text-[#b88645] transition-colors block mb-2"
               >
                 {siteConfig.contact.email}
               </a>
+              <span className="text-sm text-foreground/60 block">
+                We reply within 24 hours.
+              </span>
             </div>
 
             {/* Instagram */}
@@ -147,6 +153,30 @@ const Contact = () => {
               <span className="text-sm italic text-foreground/60 mt-2 block">
                 ({address.landmark})
               </span>
+            </div>
+          </div>
+        </AnimatedSection>
+
+        {/* ─── How We Can Help ─── */}
+        <AnimatedSection delay={0.25}>
+          <div className="bg-[#b88645]/5 rounded-3xl p-8 md:p-12 border border-[#b88645]/20 mb-12">
+            <h2 className="font-serif text-2xl text-foreground mb-6">We can help you with:</h2>
+            <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 text-foreground/80 font-sans list-disc pl-5 mb-8">
+              <li>Order tracking & delivery updates</li>
+              <li>Exchange & return requests</li>
+              <li>Product questions (size, material, occasion)</li>
+              <li>Bulk & gifting orders</li>
+              <li>Wedding & event jewellery packages</li>
+            </ul>
+
+            <div className="pt-6 border-t border-[#b88645]/20">
+              <h3 className="font-serif text-xl mb-2 text-foreground">Planning a wedding or event?</h3>
+              <p className="text-foreground/80 font-sans mb-4">
+                We offer special pricing on bulk orders. WhatsApp us with your requirements and we will create a custom package just for you.
+              </p>
+              <p className="font-medium text-[#b88645]">
+                — Team Lalisa Belle 💕
+              </p>
             </div>
           </div>
         </AnimatedSection>

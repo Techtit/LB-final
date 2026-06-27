@@ -1,7 +1,7 @@
 import { Helmet } from "react-helmet-async";
 import AnimatedSection from "@/components/AnimatedSection";
 import { Link } from "react-router-dom";
-import { Truck, ShieldCheck, Box, CreditCard, MessageCircle } from "lucide-react";
+import { ShieldCheck, Box, Clock, MessageCircle } from "lucide-react";
 import { siteConfig, getWhatsAppUrl, getEmailUrl } from "@/config/site";
 
 const ShippingPolicy = () => {
@@ -24,102 +24,87 @@ const ShippingPolicy = () => {
 
         <AnimatedSection delay={0.1}>
           <div className="bg-white border rounded-2xl p-8 md:p-12 shadow-sm space-y-12">
-            <p className="text-foreground/80 leading-relaxed font-sans">
-              We partner with <strong>Shiprocket</strong> to provide reliable delivery across India and globally via premium courier partners like <strong>{siteConfig.shipping.partners.join(", ")}</strong>.
+            <p className="text-foreground/80 leading-relaxed font-sans mb-8">
+              We deliver across India — bringing Lalisa Belle jewellery straight to your door.
             </p>
 
-            {/* Section 1 */}
+            <div className="overflow-x-auto mb-12">
+              <table className="w-full text-left border-collapse min-w-[600px]">
+                <thead>
+                  <tr className="border-b-2 border-[#b88645]">
+                    <th className="py-3 px-4 font-serif text-lg font-medium text-[#b88645]">Item</th>
+                    <th className="py-3 px-4 font-serif text-lg font-medium text-[#b88645]">Details</th>
+                  </tr>
+                </thead>
+                <tbody className="text-foreground/80 text-sm font-sans">
+                  <tr className="border-b border-border hover:bg-muted/30">
+                    <td className="py-4 px-4 font-medium text-foreground">Standard Delivery</td>
+                    <td className="py-4 px-4">5-7 business days | Free on orders above Rs.499</td>
+                  </tr>
+                  <tr className="border-b border-border hover:bg-muted/30">
+                    <td className="py-4 px-4 font-medium text-foreground">Express Delivery</td>
+                    <td className="py-4 px-4">2-3 business days | Rs.99 extra</td>
+                  </tr>
+                  <tr className="border-b border-border hover:bg-muted/30">
+                    <td className="py-4 px-4 font-medium text-foreground">Same-Day (Gurugram)</td>
+                    <td className="py-4 px-4">Orders placed before 12 PM | Rs.49</td>
+                  </tr>
+                  <tr className="border-b border-border hover:bg-muted/30">
+                    <td className="py-4 px-4 font-medium text-foreground">Free Shipping</td>
+                    <td className="py-4 px-4">All orders above Rs.499 across India</td>
+                  </tr>
+                  <tr className="border-b border-border hover:bg-muted/30">
+                    <td className="py-4 px-4 font-medium text-foreground">COD (Cash on Delivery)</td>
+                    <td className="py-4 px-4">Available up to Rs.2,000 | Rs.50 COD charge</td>
+                  </tr>
+                  <tr className="border-b border-border hover:bg-muted/30">
+                    <td className="py-4 px-4 font-medium text-foreground">Prepaid Orders</td>
+                    <td className="py-4 px-4">Processed and dispatched within 24 hours</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            {/* Section 1 — Order Processing */}
             <section>
               <div className="flex items-center gap-3 mb-4 text-[#b88645]">
-                <Truck size={24} />
-                <h2 className="font-serif text-2xl">1. Processing & Delivery Timelines</h2>
+                <Clock size={24} />
+                <h2 className="font-serif text-2xl">1. Order Processing</h2>
               </div>
               <ul className="list-disc pl-6 space-y-2 text-foreground/70">
-                <li><strong>Order Processing:</strong> All orders are processed within {siteConfig.shipping.processingDays} business days. Orders are not shipped on Sundays or public holidays.</li>
-                <li><strong>Standard Shipping:</strong> Typically delivered within 5–7 business days after dispatch.</li>
-                <li><strong>Express Shipping:</strong> Delivered within 2–4 business days for metro cities.</li>
-                <li><strong>International Shipping:</strong> Delivered within 7–15 business days depending on the destination and customs clearance.</li>
+                <li>Orders processed Monday to Saturday (excluding public holidays)</li>
+                <li>Orders placed before 2 PM dispatched the same day</li>
+                <li>Orders after 2 PM or on Sundays dispatched next business day</li>
+                <li>You will receive a WhatsApp/SMS with your tracking link once dispatched</li>
               </ul>
             </section>
 
-            {/* Section 2 */}
-            <section>
-              <div className="flex items-center gap-3 mb-4 text-[#b88645]">
-                <CreditCard size={24} />
-                <h2 className="font-serif text-2xl">2. Shipping Charges</h2>
-              </div>
-              <ul className="list-disc pl-6 space-y-2 text-foreground/70">
-                <li><strong>Domestic (India):</strong> We offer Free Shipping on all orders above ₹{siteConfig.shipping.freeThresholdINR}. For orders below this, a flat fee of ₹{siteConfig.shipping.flatFeeINR} applies.</li>
-                <li><strong>International:</strong> Shipping costs are calculated at checkout based on the package weight and destination country.</li>
-              </ul>
-            </section>
-
-            {/* Section 3 */}
+            {/* Section 2 — Packaging */}
             <section>
               <div className="flex items-center gap-3 mb-4 text-[#b88645]">
                 <Box size={24} />
-                <h2 className="font-serif text-2xl">3. Secure Packaging & Discretion</h2>
+                <h2 className="font-serif text-2xl">2. Packaging</h2>
               </div>
-              <ul className="list-disc pl-6 space-y-2 text-foreground/70">
-                <li><strong>Discreet Outer Boxes:</strong> To prevent theft, our outer packaging is unbranded and does not mention "Jewelry," "Gold," or "Diamonds".</li>
-                <li><strong>Tamper-Evident Seals:</strong> We use tamper-proof bags and security tapes. Please do not accept the package if the seal is broken or the box is visibly damaged.</li>
-                <li><strong>Cushioning:</strong> Each piece is placed in a premium jewellery box, then secured with bubble wrap or foam within a sturdy corrugated box.</li>
-              </ul>
+              <p className="text-foreground/70">
+                Every Lalisa Belle order is packed in our branded jewellery pouch — gift-ready and beautiful. 💕
+              </p>
             </section>
 
-            {/* Section 4 */}
+            {/* Section 3 — Damaged in Transit? */}
             <section>
               <div className="flex items-center gap-3 mb-4 text-[#b88645]">
                 <ShieldCheck size={24} />
-                <h2 className="font-serif text-2xl">4. Order Tracking & Security</h2>
+                <h2 className="font-serif text-2xl">3. Damaged in Transit?</h2>
               </div>
-              <ul className="list-disc pl-6 space-y-2 text-foreground/70">
-                <li><strong>Real-Time Tracking:</strong> Once dispatched, you will receive a tracking link via email/SMS.</li>
-                <li><strong>Insurance Coverage:</strong> All high-value shipments are protected under Shiprocket Secure. This covers your order against loss or damage during transit for values up to ₹25 Lakhs.</li>
-                <li><strong>Signature on Delivery:</strong> For your safety, most jewellery shipments require a signature upon delivery.</li>
-              </ul>
-            </section>
-
-            {/* Section 5 */}
-            <section className="bg-stone-50 p-6 rounded-xl border border-stone-200">
-              <h2 className="font-serif text-xl mb-3">5. Important Notes</h2>
-              <ul className="list-disc pl-6 space-y-2 text-foreground/70 text-sm">
-                <li><strong>Address Verification:</strong> Please ensure your shipping address and contact number are accurate.</li>
-                <li><strong>Customs & Duties:</strong> For international orders, any import duties or taxes are the responsibility of the customer.</li>
-              </ul>
-            </section>
-
-            {/* Questions CTA */}
-            <section className="bg-[#b88645]/5 p-6 rounded-xl border border-[#b88645]/20">
-              <div className="flex items-center gap-3 mb-4 text-[#b88645]">
-                <MessageCircle size={24} />
-                <h2 className="font-serif text-xl">Questions About Shipping?</h2>
-              </div>
-              <p className="text-foreground/70 text-sm mb-4">
-                We're here to help with any shipping-related queries.
+              <p className="text-foreground/70 mb-4">
+                WhatsApp us at{" "}
+                <a href={getWhatsAppUrl("Hi, my order was damaged in transit")} target="_blank" rel="noopener noreferrer" className="text-[#b88645] underline underline-offset-2">
+                  {siteConfig.contact.phone}
+                </a>{" "}
+                within 24 hours of delivery with photos.
+                <br />
+                We will replace it immediately at no extra cost.
               </p>
-              <div className="flex flex-wrap gap-3">
-                <a
-                  href={getWhatsAppUrl("Hi, I have a question about shipping")}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-[#25D366] text-white text-sm font-medium rounded-full hover:bg-[#1da851] transition-colors"
-                >
-                  Chat on WhatsApp
-                </a>
-                <a
-                  href={getEmailUrl()}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-[#b88645]/30 text-foreground text-sm font-medium rounded-full hover:border-[#b88645] transition-colors"
-                >
-                  Email Us
-                </a>
-                <Link
-                  to="/contact"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-border text-foreground text-sm font-medium rounded-full hover:border-[#b88645] transition-colors"
-                >
-                  Contact Page →
-                </Link>
-              </div>
             </section>
           </div>
         </AnimatedSection>
