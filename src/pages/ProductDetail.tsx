@@ -158,11 +158,11 @@ const ProductDetail = () => {
             </div>
 
             <div className="flex flex-col gap-3">
-              <Button size="lg" className="w-full h-14 font-sans text-base font-bold tracking-wide rounded-xl shadow-lg shadow-primary/20" onClick={handleAddToCart} disabled={cartLoading || !variant?.availableForSale}>
+              <Button size="lg" className="w-full h-14 font-sans text-base font-bold tracking-wide rounded-xl shadow-lg shadow-primary/20" onClick={handleAddToCart} disabled={cartLoading || !variant?.availableForSale || (variant?.quantityAvailable !== undefined && variant.quantityAvailable <= 0)}>
                 {cartLoading ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <ShoppingBag className="w-5 h-5 mr-2" />}
-                Add to Bag — {currency}{price.toLocaleString()}
+                {(!variant?.availableForSale || (variant?.quantityAvailable !== undefined && variant.quantityAvailable <= 0)) ? "Out of Stock" : `Add to Bag — ${currency}${price.toLocaleString()}`}
               </Button>
-              <Button size="lg" variant="outline" className="w-full h-14 font-sans text-base font-medium tracking-wide rounded-xl hover:bg-muted/50 transition-colors" onClick={handleBuyNow} disabled={cartLoading || !variant?.availableForSale}>
+              <Button size="lg" variant="outline" className="w-full h-14 font-sans text-base font-medium tracking-wide rounded-xl hover:bg-muted/50 transition-colors" onClick={handleBuyNow} disabled={cartLoading || !variant?.availableForSale || (variant?.quantityAvailable !== undefined && variant.quantityAvailable <= 0)}>
                 Express Checkout
               </Button>
             </div>
