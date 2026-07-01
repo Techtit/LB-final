@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { X } from "lucide-react";
 import { SafeImage } from "@/components/ui/SafeImage";
 import { cn } from "@/lib/utils";
 import {
@@ -16,7 +17,7 @@ interface ProductGalleryProps {
   discount: number | null;
 }
 
-const ZoomableImage = ({ src, alt, isActive }: { src: string; alt: string; isActive: boolean }) => {
+const ZoomableImage = ({ src, alt, isActive, onClick }: { src: string; alt: string; isActive: boolean; onClick: () => void }) => {
   const [zoomStyle, setZoomStyle] = useState({ display: 'none', transformOrigin: '0% 0%' });
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -38,15 +39,16 @@ const ZoomableImage = ({ src, alt, isActive }: { src: string; alt: string; isAct
 
   return (
     <div 
-      className="relative w-full h-full cursor-crosshair group overflow-hidden"
+      className="relative w-full h-full cursor-zoom-in group overflow-hidden bg-white"
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
+      onClick={onClick}
     >
       <SafeImage 
         src={src} 
         alt={alt} 
         className={cn(
-          "w-full h-full object-cover transition-opacity duration-300",
+          "w-full h-full object-contain transition-opacity duration-300",
           zoomStyle.display === 'block' && "opacity-0"
         )} 
         loading={isActive ? "eager" : "lazy"}
@@ -55,7 +57,8 @@ const ZoomableImage = ({ src, alt, isActive }: { src: string; alt: string; isAct
         className="absolute inset-0 w-full h-full bg-no-repeat pointer-events-none transition-transform duration-200"
         style={{
           backgroundImage: `url(${src})`,
-          backgroundSize: '250%',
+          backgroundSize: 'contain',
+          transform: 'scale(2.5)',
           backgroundPosition: zoomStyle.transformOrigin,
           display: zoomStyle.display,
         }}
@@ -67,6 +70,7 @@ const ZoomableImage = ({ src, alt, isActive }: { src: string; alt: string; isAct
 export const ProductGallery = ({ images, title, discount }: ProductGalleryProps) => {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
+  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!api) return;
@@ -92,7 +96,7 @@ export const ProductGallery = ({ images, title, discount }: ProductGalleryProps)
           <CarouselContent className="w-full h-full ml-0">
             {images.map((img, idx) => (
               <CarouselItem key={`${img.url}-${idx}`} className="w-full h-full pl-0 relative flex items-center justify-center">
-                <ZoomableImage src={img.url} alt={img.altText || `${title} ${idx + 1}`} isActive={idx === current} />
+                <ZoomableImage src={img.url} alt={img.altText || `${title} ${idx + 1}`} isActive={idx === current} onClick={() => setLightboxImage(img.url)} />
               </CarouselItem>
             ))}
           </CarouselContent>
@@ -134,6 +138,25 @@ export const ProductGallery = ({ images, title, discount }: ProductGalleryProps)
               />
             </button>
           ))}
+        </div>
+      )}
+      {/* Lightbox */}
+      {lightboxImage && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4 md:p-12 cursor-zoom-out"
+          onClick={() => setLightboxImage(null)}
+        >
+          <button 
+            className="absolute top-4 right-4 md:top-8 md:right-8 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
+            onClick={(e) => { e.stopPropagation(); setLightboxImage(null); }}
+          >
+            <X size={24} />
+          </button>
+          <img 
+            src={lightboxImage} 
+            alt="Expanded view" 
+            className="w-full h-full object-contain"
+          />
         </div>
       )}
     </div>
