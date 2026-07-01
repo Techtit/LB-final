@@ -39,7 +39,7 @@ const ZoomableImage = ({ src, alt, isActive, onClick }: { src: string; alt: stri
 
   return (
     <div 
-      className="relative w-full h-full cursor-zoom-in group overflow-hidden bg-white"
+      className="relative w-full cursor-zoom-in group overflow-hidden"
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       onClick={onClick}
@@ -48,7 +48,7 @@ const ZoomableImage = ({ src, alt, isActive, onClick }: { src: string; alt: stri
         src={src} 
         alt={alt} 
         className={cn(
-          "w-full h-full object-contain transition-opacity duration-300",
+          "w-full h-auto max-h-[80vh] object-contain transition-opacity duration-300",
           zoomStyle.display === 'block' && "opacity-0"
         )} 
         loading={isActive ? "eager" : "lazy"}
@@ -91,11 +91,11 @@ export const ProductGallery = ({ images, title, discount }: ProductGalleryProps)
   return (
     <div className="flex flex-col gap-4">
       {/* Main Image Carousel */}
-      <div className="relative aspect-square rounded-xl overflow-hidden bg-muted border border-border/50">
-        <Carousel setApi={setApi} className="w-full h-full [&_.overflow-hidden]:h-full">
-          <CarouselContent className="w-full h-full ml-0">
+      <div className="relative rounded-xl overflow-hidden bg-muted/20 border border-border/50">
+        <Carousel setApi={setApi} className="w-full">
+          <CarouselContent className="w-full ml-0 items-center">
             {images.map((img, idx) => (
-              <CarouselItem key={`${img.url}-${idx}`} className="w-full h-full pl-0 relative flex items-center justify-center">
+              <CarouselItem key={`${img.url}-${idx}`} className="w-full pl-0 relative flex justify-center">
                 <ZoomableImage src={img.url} alt={img.altText || `${title} ${idx + 1}`} isActive={idx === current} onClick={() => setLightboxImage(img.url)} />
               </CarouselItem>
             ))}

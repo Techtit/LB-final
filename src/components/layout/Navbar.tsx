@@ -84,10 +84,6 @@ const Navbar = () => {
 
   return (
     <>
-      <div className="bg-foreground text-background text-center text-xs py-2 font-sans tracking-wider">
-        FREE SHIPPING ON ORDERS ABOVE ₹499 ✨
-      </div>
-
       <header className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-white/10">
         <div className="container grid grid-cols-3 items-center h-16 md:h-24">
           {/* Left Column */}
