@@ -58,7 +58,6 @@ const HeroSection = () => {
     return sessionStorage.getItem("selectedCategory") || "Women";
   });
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isDefaultImageLoaded, setIsDefaultImageLoaded] = useState(false);
 
   // Sync category from EntryPrompt custom event
   useEffect(() => {
@@ -71,32 +70,6 @@ const HeroSection = () => {
 
     window.addEventListener("lb-category-selected", handleCategoryChange);
     return () => window.removeEventListener("lb-category-selected", handleCategoryChange);
-  }, []);
-  // Preload first images of each category
-  useEffect(() => {
-    const imagesToPreload = [
-      "/hero/20-50-women.jpg",
-      "/hero/20-50-men.jpeg",
-      "/hero/bgpets.jpg"
-    ];
-    
-    let loadedCount = 0;
-    imagesToPreload.forEach(src => {
-      const img = new Image();
-      img.src = src;
-      img.onload = () => {
-        loadedCount++;
-        if (loadedCount === imagesToPreload.length) setIsDefaultImageLoaded(true);
-      };
-      if (img.complete) {
-        loadedCount++;
-        if (loadedCount === imagesToPreload.length) setIsDefaultImageLoaded(true);
-      }
-    });
-
-    // Fallback if images fail to load or are already cached but listeners don't fire
-    const timer = setTimeout(() => setIsDefaultImageLoaded(true), 2000);
-    return () => clearTimeout(timer);
   }, []);
 
   // Background cycling effect
@@ -111,10 +84,6 @@ const HeroSection = () => {
     return () => clearInterval(interval);
   }, [selectedCategory]);
 
-  if (!isDefaultImageLoaded) {
-    return <div className="h-screen bg-black" />;
-  }
-
   const currentCopy = heroCopy[selectedCategory] || heroCopy.General;
 
   return (
@@ -126,6 +95,8 @@ const HeroSection = () => {
               key={`${cat}-${idx}`}
               src={img.src}
               alt={`Hero Background ${cat} ${idx}`}
+              fetchPriority={selectedCategory === cat && idx === 0 ? "high" : "auto"}
+              loading={selectedCategory === cat && idx === 0 ? "eager" : "lazy"}
               className={`absolute inset-0 w-full h-full object-cover ${img.pos || 'object-center'} transition-opacity duration-1000 ease-in-out ${
                 selectedCategory === cat && currentImageIndex === idx ? "opacity-100 z-0" : "opacity-0 -z-10"
               }`}
