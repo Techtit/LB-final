@@ -89,7 +89,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
     >
       <Link 
         to={`/product/${p.handle}`} 
-        className="block relative overflow-hidden rounded-md bg-muted aspect-square mb-3"
+        className="block relative overflow-hidden rounded-md aspect-square mb-3"
         onClick={handleCardClick}
       >
         {imageUrl && (

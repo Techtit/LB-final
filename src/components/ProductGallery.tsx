@@ -91,7 +91,7 @@ export const ProductGallery = ({ images, title, discount }: ProductGalleryProps)
   return (
     <div className="flex flex-col gap-4">
       {/* Main Image Carousel */}
-      <div className="relative rounded-xl overflow-hidden bg-muted/20 border border-border/50">
+      <div className="relative rounded-xl overflow-hidden">
         <Carousel setApi={setApi} className="w-full">
           <CarouselContent className="w-full ml-0 items-center">
             {images.map((img, idx) => (
