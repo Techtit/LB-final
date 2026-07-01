@@ -125,7 +125,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
         {/* Add to cart button */}
         <button
           onClick={handleAddToCart}
-          disabled={isLoading || !variant?.availableForSale || (variant?.quantityAvailable !== undefined && variant.quantityAvailable <= 0)}
+          disabled={isLoading || !variant?.availableForSale}
           className={cn(
             "absolute bottom-2 right-2 h-9 px-4 rounded-full flex items-center justify-center gap-1.5 transition-all duration-300 shadow-xl text-xs font-semibold font-sans z-30",
             // Base state: Hidden
