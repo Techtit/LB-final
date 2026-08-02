@@ -38,6 +38,7 @@ const Shop = () => {
     // 1. Semantic Category Match (e.g. "Earrings")
     if (category) {
       const catLower = category.toLowerCase();
+      const regex = new RegExp(`\\b${catLower}\\b`, 'i');
       result = result.filter(p => {
         const node = p.node;
         const pType = node.productType?.toLowerCase() || '';
@@ -46,24 +47,25 @@ const Shop = () => {
         const description = node.descriptionHtml?.toLowerCase() || '';
         
         return pType === catLower || 
-               title.includes(catLower) || 
+               regex.test(title) || 
                tags.some(t => t.toLowerCase() === catLower) ||
-               description.includes(catLower);
+               regex.test(description);
       });
     }
 
     // 2. Semantic Segment Match (e.g. "Women", "Men")
     if (segment) {
       const segLower = segment.toLowerCase();
+      const regex = new RegExp(`\\b${segLower}\\b`, 'i');
       result = result.filter(p => {
         const node = p.node;
         const title = node.title?.toLowerCase() || '';
         const tags = node.tags || [];
         const description = node.descriptionHtml?.toLowerCase() || '';
         
-        return title.includes(segLower) || 
+        return regex.test(title) || 
                tags.some(t => t.toLowerCase() === segLower) ||
-               description.includes(segLower);
+               regex.test(description);
       });
     }
 

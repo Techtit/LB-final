@@ -38,12 +38,19 @@ const CategorySection = () => {
   const getCategoryImage = (catName: string, defaultImage: string) => {
     if (!products || products.length === 0) return defaultImage;
     const searchStr = catName.toLowerCase();
-    const product = products.find(p => 
-      p.node.productType?.toLowerCase().includes(searchStr) || 
-      p.node.tags?.some(t => t.toLowerCase().includes(searchStr)) ||
-      p.node.title?.toLowerCase().includes(searchStr) ||
-      p.node.handle?.toLowerCase().includes(searchStr)
-    );
+    const regex = new RegExp(`\\b${searchStr}\\b`, 'i');
+    const product = products.find(p => {
+      const node = p.node;
+      const pType = node.productType?.toLowerCase() || '';
+      const title = node.title?.toLowerCase() || '';
+      const tags = node.tags || [];
+      const handle = node.handle?.toLowerCase() || '';
+      
+      return pType === searchStr || 
+             tags.some(t => t.toLowerCase() === searchStr) ||
+             regex.test(title) ||
+             regex.test(handle);
+    });
     if (product && product.node.images?.edges?.length > 0) {
       return product.node.images.edges[0].node.url;
     }
@@ -60,13 +67,15 @@ const CategorySection = () => {
     ? products
     : products.filter(p => {
         const catLower = activeCategory.toLowerCase();
+        const regex = new RegExp(`\\b${catLower}\\b`, 'i');
         const node = p.node;
         const pType = node.productType?.toLowerCase() || '';
         const title = node.title?.toLowerCase() || '';
         const tags = node.tags || [];
-        return pType.includes(catLower) || 
-               title.includes(catLower) || 
-               tags.some(t => t.toLowerCase().includes(catLower));
+        
+        return pType === catLower || 
+               regex.test(title) || 
+               tags.some(t => t.toLowerCase() === catLower);
       });
 
   // Get categories that have no products available
