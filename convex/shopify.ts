@@ -100,6 +100,17 @@ export const getCustomerOrders = action({
                   url
                   company
                 }
+                fulfillmentLineItems(first: 20) {
+                  edges {
+                    node {
+                      id
+                      quantity
+                      lineItem {
+                        id
+                      }
+                    }
+                  }
+                }
               }
               lineItems(first: 20) {
                 edges {
@@ -283,5 +294,169 @@ export const cancelOrder = action({
     }
 
     return JSON.stringify({ success: true });
+  },
+});
+
+/**
+ * Request a return for a fulfilled Shopify order.
+ * Verifies the authenticated user owns the order before returning.
+ */
+export const requestReturn = action({
+  args: {
+    orderId: v.string(),
+    returnItems: v.array(
+      v.object({
+        fulfillmentLineItemId: v.string(),
+        quantity: v.number(),
+        returnReason: v.string(),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Unauthenticated call to requestReturn");
+    }
+
+    const email = identity.email;
+    if (!email) {
+      throw new Error("User has no email associated with their account");
+    }
+
+    const domain = process.env.SHOPIFY_STORE_DOMAIN;
+    const adminToken = process.env.SHOPIFY_ADMIN_API_TOKEN;
+
+    if (!domain || !adminToken) {
+      throw new Error(
+        "Missing Shopify Admin API credentials. Set SHOPIFY_STORE_DOMAIN and SHOPIFY_ADMIN_API_TOKEN in your Convex environment variables."
+      );
+    }
+
+    const url = `https://${domain}/admin/api/${SHOPIFY_API_VERSION}/graphql.json`;
+
+    // Step 1: Fetch the order to verify ownership and eligibility
+    const verifyQuery = `
+      query getOrder($id: ID!) {
+        order(id: $id) {
+          id
+          email
+          createdAt
+          displayFulfillmentStatus
+          cancelledAt
+        }
+      }
+    `;
+
+    const verifyResponse = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Shopify-Access-Token": adminToken,
+      },
+      body: JSON.stringify({
+        query: verifyQuery,
+        variables: { id: args.orderId },
+      }),
+    });
+
+    if (!verifyResponse.ok) {
+      throw new Error("Failed to verify order with Shopify");
+    }
+
+    const verifyData = await verifyResponse.json();
+    const order = verifyData?.data?.order;
+
+    if (!order) {
+      throw new Error("Order not found");
+    }
+
+    if (order.email?.toLowerCase() !== email.toLowerCase()) {
+      throw new Error("You are not authorized to return this order");
+    }
+
+    if (order.cancelledAt) {
+      throw new Error("Cancelled orders cannot be returned");
+    }
+
+    if (
+      order.displayFulfillmentStatus !== "FULFILLED" &&
+      order.displayFulfillmentStatus !== "PARTIALLY_FULFILLED"
+    ) {
+      throw new Error("Only fulfilled orders can be returned.");
+    }
+
+    const orderDate = new Date(order.createdAt);
+    const now = new Date();
+    const daysSinceOrder = (now.getTime() - orderDate.getTime()) / (1000 * 3600 * 24);
+    
+    if (daysSinceOrder > 7) {
+      throw new Error("This order is past the 7-day return window.");
+    }
+
+    // Step 2: Create the return request
+    const returnMutation = `
+      mutation returnRequest($returnInput: ReturnInput!) {
+        returnRequest(returnInput: $returnInput) {
+          return {
+            id
+            status
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `;
+
+    const returnResponse = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Shopify-Access-Token": adminToken,
+      },
+      body: JSON.stringify({
+        query: returnMutation,
+        variables: {
+          returnInput: {
+            orderId: args.orderId,
+            returnLineItems: args.returnItems.map((item) => ({
+              fulfillmentLineItemId: item.fulfillmentLineItemId,
+              quantity: item.quantity,
+              returnReason: item.returnReason,
+            })),
+          },
+        },
+      }),
+    });
+
+    if (!returnResponse.ok) {
+      const errorText = await returnResponse.text();
+      console.error("Shopify return request failed:", errorText);
+      throw new Error("Failed to request return with Shopify");
+    }
+
+    const returnData = await returnResponse.json();
+
+    if (returnData.errors) {
+      console.error(
+        "Shopify GraphQL Errors:",
+        JSON.stringify(returnData.errors, null, 2)
+      );
+      throw new Error(
+        "Shopify error: " + returnData.errors[0]?.message || "Unknown error"
+      );
+    }
+
+    const userErrors = returnData?.data?.returnRequest?.userErrors || [];
+    if (userErrors.length > 0) {
+      const errorMsg = userErrors.map((e: any) => e.message).join(", ");
+      
+      // Fallback: If returnRequest isn't available or fails because it's the wrong mutation for this workflow,
+      // we could try returnCreate, but let's stick to the standard returnRequest and bubble up the error.
+      throw new Error("Cannot request return: " + errorMsg);
+    }
+
+    return JSON.stringify({ success: true, returnId: returnData?.data?.returnRequest?.return?.id });
   },
 });

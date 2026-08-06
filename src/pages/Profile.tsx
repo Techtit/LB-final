@@ -32,7 +32,8 @@ import {
   XCircle,
   RefreshCw,
   ShoppingBag,
-  Loader2
+  Loader2,
+  Undo2
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -63,10 +64,16 @@ const Profile = () => {
   // Shopify Orders via Action
   const getCustomerOrders = useAction(api.shopify.getCustomerOrders);
   const cancelOrderAction = useAction(api.shopify.cancelOrder);
+  const requestReturnAction = useAction(api.shopify.requestReturn);
   const [orders, setOrders] = useState<any[]>([]);
   const [isFetchingOrders, setIsFetchingOrders] = useState(true);
   const [cancellingOrderId, setCancellingOrderId] = useState<string | null>(null);
   const [confirmCancelOrderId, setConfirmCancelOrderId] = useState<string | null>(null);
+  
+  // Returns
+  const [returnModalOrder, setReturnModalOrder] = useState<any | null>(null);
+  const [selectedReturnItems, setSelectedReturnItems] = useState<{ [id: string]: { quantity: number, reason: string } }>({});
+  const [isReturning, setIsReturning] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -164,6 +171,34 @@ const Profile = () => {
     }
   };
 
+  const handleRequestReturn = async () => {
+    if (!returnModalOrder) return;
+    
+    const returnItems = Object.entries(selectedReturnItems).map(([fulfillmentLineItemId, data]) => ({
+      fulfillmentLineItemId,
+      quantity: data.quantity,
+      returnReason: data.reason || "UNKNOWN",
+    })).filter(item => item.quantity > 0);
+
+    if (returnItems.length === 0) {
+      toast.error("Please select at least one item to return");
+      return;
+    }
+
+    try {
+      setIsReturning(true);
+      await requestReturnAction({ orderId: returnModalOrder.id, returnItems });
+      toast.success("Return requested successfully");
+      setReturnModalOrder(null);
+      setSelectedReturnItems({});
+      await fetchOrders();
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to request return");
+    } finally {
+      setIsReturning(false);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-IN", { 
       year: 'numeric', month: 'short', day: 'numeric' 
@@ -242,6 +277,10 @@ const Profile = () => {
           const status = order.cancelledAt ? "CANCELLED" : (order.displayFulfillmentStatus || "UNFULFILLED");
           const isCancelable = !order.cancelledAt && status === "UNFULFILLED";
           const trackingInfo = order.fulfillments?.edges?.[0]?.node?.trackingInfo?.[0] || order.fulfillments?.[0]?.trackingInfo?.[0]; 
+          
+          const orderDate = new Date(order.createdAt);
+          const daysSinceOrder = (new Date().getTime() - orderDate.getTime()) / (1000 * 3600 * 24);
+          const isReturnable = !order.cancelledAt && (status === "FULFILLED" || status === "PARTIALLY_FULFILLED") && daysSinceOrder <= 7;
 
           return (
             <Card key={order.id} className="border-stone-200 shadow-sm overflow-hidden">
@@ -350,6 +389,24 @@ const Profile = () => {
                             ) : (
                               <><XCircle className="w-3.5 h-3.5 mr-1.5" /> Cancel Order</>
                             )}
+                          </Button>
+                        </div>
+                      )}
+
+                      {/* Return Order Button */}
+                      {isReturnable && (
+                        <div className="pt-4 border-t border-stone-200 mt-4">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setReturnModalOrder(order);
+                              setSelectedReturnItems({});
+                            }}
+                            className="text-amber-700 border-amber-200 hover:bg-amber-50 hover:text-amber-800 font-sans text-xs rounded-full"
+                          >
+                            <Undo2 className="w-3.5 h-3.5 mr-1.5" /> Request Return
                           </Button>
                         </div>
                       )}
@@ -548,6 +605,141 @@ const Profile = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Return Modal */}
+      <AnimatePresence>
+        {returnModalOrder && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 md:p-6"
+            onClick={() => setReturnModalOrder(null)}
+          >
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white w-full max-w-2xl max-h-[85vh] rounded-2xl overflow-hidden relative shadow-2xl flex flex-col border border-stone-200"
+            >
+              <div className="p-4 md:p-5 border-b border-stone-100 flex justify-between items-center bg-stone-50/50">
+                <div className="flex items-center gap-3 text-stone-800">
+                  <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center">
+                     <Undo2 className="w-4 h-4 text-amber-700" />
+                  </div>
+                  <div>
+                    <h2 className="font-serif text-xl font-medium">Return Items</h2>
+                    <p className="text-xs text-stone-500 font-sans">Order {returnModalOrder.name}</p>
+                  </div>
+                </div>
+                <Button variant="ghost" size="icon" onClick={() => setReturnModalOrder(null)} className="rounded-full hover:bg-stone-200">
+                  <X className="w-5 h-5 opacity-70" />
+                </Button>
+              </div>
+              <div className="flex-1 w-full bg-white overflow-y-auto p-5">
+                <p className="text-sm text-stone-600 font-sans mb-4">Select the items you wish to return and provide a reason for each.</p>
+                <div className="space-y-4">
+                  {/* Find all fulfilled items in this order */}
+                  {returnModalOrder.fulfillments?.edges?.map((fEdge: any) => 
+                    fEdge.node.fulfillmentLineItems?.edges?.map((flEdge: any) => {
+                      const flItem = flEdge.node;
+                      // Match back to the original line item to get title/image
+                      const originalLineItem = returnModalOrder.lineItems.edges.find(
+                        (lEdge: any) => lEdge.node.id === flItem.lineItem.id
+                      )?.node;
+
+                      if (!originalLineItem) return null;
+
+                      const isSelected = !!selectedReturnItems[flItem.id];
+                      const selectedQty = selectedReturnItems[flItem.id]?.quantity || 1;
+
+                      return (
+                        <div key={flItem.id} className="border border-stone-200 rounded-lg p-4 flex gap-4 items-start">
+                          <input 
+                            type="checkbox" 
+                            className="mt-1 w-4 h-4 text-amber-600 rounded border-stone-300"
+                            checked={isSelected}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedReturnItems(prev => ({
+                                  ...prev,
+                                  [flItem.id]: { quantity: 1, reason: "UNKNOWN" }
+                                }));
+                              } else {
+                                const newItems = { ...selectedReturnItems };
+                                delete newItems[flItem.id];
+                                setSelectedReturnItems(newItems);
+                              }
+                            }}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-stone-800 font-sans">{originalLineItem.title}</p>
+                            <p className="text-xs text-stone-500 font-sans mt-0.5">Fulfilled Qty: {flItem.quantity}</p>
+                            
+                            {isSelected && (
+                              <div className="mt-3 flex gap-3">
+                                <div className="flex flex-col gap-1">
+                                  <label className="text-xs font-bold text-stone-500 uppercase tracking-wider">Qty</label>
+                                  <select 
+                                    className="border border-stone-200 rounded p-1.5 text-sm font-sans"
+                                    value={selectedQty}
+                                    onChange={(e) => {
+                                      setSelectedReturnItems(prev => ({
+                                        ...prev,
+                                        [flItem.id]: { ...prev[flItem.id], quantity: parseInt(e.target.value) }
+                                      }));
+                                    }}
+                                  >
+                                    {Array.from({ length: flItem.quantity }).map((_, i) => (
+                                      <option key={i+1} value={i+1}>{i+1}</option>
+                                    ))}
+                                  </select>
+                                </div>
+                                <div className="flex flex-col gap-1 flex-1">
+                                  <label className="text-xs font-bold text-stone-500 uppercase tracking-wider">Reason</label>
+                                  <select 
+                                    className="border border-stone-200 rounded p-1.5 text-sm font-sans w-full"
+                                    value={selectedReturnItems[flItem.id]?.reason || "UNKNOWN"}
+                                    onChange={(e) => {
+                                      setSelectedReturnItems(prev => ({
+                                        ...prev,
+                                        [flItem.id]: { ...prev[flItem.id], reason: e.target.value }
+                                      }));
+                                    }}
+                                  >
+                                    <option value="UNKNOWN">Select reason...</option>
+                                    <option value="SIZE_TOO_SMALL">Size too small</option>
+                                    <option value="SIZE_TOO_LARGE">Size too large</option>
+                                    <option value="UNWANTED">Changed my mind</option>
+                                    <option value="DEFECTIVE">Item defective</option>
+                                    <option value="WRONG_ITEM">Wrong item received</option>
+                                    <option value="COLOR_UNMATCHED">Color not as expected</option>
+                                  </select>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+              <div className="p-4 md:p-5 border-t border-stone-100 bg-stone-50/50 flex justify-end gap-3">
+                <Button variant="ghost" className="font-sans rounded-full text-stone-500" onClick={() => setReturnModalOrder(null)}>Cancel</Button>
+                <Button 
+                  onClick={handleRequestReturn} 
+                  disabled={isReturning || Object.keys(selectedReturnItems).length === 0}
+                  className="bg-[#b18146] hover:bg-amber-700 text-white font-sans rounded-full"
+                >
+                  {isReturning ? <><Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Processing...</> : "Submit Return"}
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Header Section */}
       <div className="bg-white border-b border-stone-200 pt-16 pb-12">
