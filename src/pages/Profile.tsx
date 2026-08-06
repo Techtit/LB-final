@@ -3,6 +3,16 @@ import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { 
   User, 
   MapPin, 
@@ -19,6 +29,7 @@ import {
   AlertCircle,
   Truck,
   X,
+  XCircle,
   RefreshCw,
   ShoppingBag,
   Loader2
@@ -51,8 +62,11 @@ const Profile = () => {
 
   // Shopify Orders via Action
   const getCustomerOrders = useAction(api.shopify.getCustomerOrders);
+  const cancelOrderAction = useAction(api.shopify.cancelOrder);
   const [orders, setOrders] = useState<any[]>([]);
   const [isFetchingOrders, setIsFetchingOrders] = useState(true);
+  const [cancellingOrderId, setCancellingOrderId] = useState<string | null>(null);
+  const [confirmCancelOrderId, setConfirmCancelOrderId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -118,6 +132,36 @@ const Profile = () => {
 
   const openTracking = (url: string) => {
     setTrackingUrl(url);
+  };
+
+  const fetchOrders = async () => {
+    try {
+      setIsFetchingOrders(true);
+      const res = await getCustomerOrders();
+      const parsed = JSON.parse(res);
+      if (parsed?.data?.orders?.edges) {
+        setOrders(parsed.data.orders.edges.map((e: any) => e.node));
+      }
+    } catch (err) {
+      console.error("Failed to fetch shopify orders", err);
+    } finally {
+      setIsFetchingOrders(false);
+    }
+  };
+
+  const handleCancelOrder = async (orderId: string) => {
+    try {
+      setCancellingOrderId(orderId);
+      await cancelOrderAction({ orderId });
+      toast.success("Order cancelled successfully. A refund will be processed.");
+      // Refresh orders to reflect cancellation
+      await fetchOrders();
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to cancel order");
+    } finally {
+      setCancellingOrderId(null);
+      setConfirmCancelOrderId(null);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -195,7 +239,8 @@ const Profile = () => {
       <div className="space-y-4">
         {orders.map((order) => {
           const isExpanded = expandedOrder === order.id;
-          const status = order.displayFulfillmentStatus || "UNFULFILLED";
+          const status = order.cancelledAt ? "CANCELLED" : (order.displayFulfillmentStatus || "UNFULFILLED");
+          const isCancelable = !order.cancelledAt && status === "UNFULFILLED";
           const trackingInfo = order.fulfillments?.edges?.[0]?.node?.trackingInfo?.[0] || order.fulfillments?.[0]?.trackingInfo?.[0]; 
 
           return (
@@ -209,6 +254,7 @@ const Profile = () => {
                     <span className="text-sm font-bold text-stone-700 font-sans">Order {order.name}</span>
                     <span className={cn(
                       "text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider",
+                      status === 'CANCELLED' ? 'bg-red-100 text-red-700' :
                       status.includes('FULFILLED') || status.includes('DELIVERED') ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
                     )}>
                       {status.replace(/_/g, ' ')}
@@ -284,6 +330,36 @@ const Profile = () => {
                          <div className="pt-4 border-t border-stone-200 flex items-center gap-2 text-sm text-stone-500 italic font-sans">
                             <Truck className="w-4 h-4 opacity-50" /> Tracking will be available soon
                          </div>
+                      )}
+
+                      {/* Cancel Order Button */}
+                      {isCancelable && (
+                        <div className="pt-4 border-t border-stone-200 mt-4">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={cancellingOrderId === order.id}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setConfirmCancelOrderId(order.id);
+                            }}
+                            className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 font-sans text-xs rounded-full"
+                          >
+                            {cancellingOrderId === order.id ? (
+                              <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> Cancelling...</>
+                            ) : (
+                              <><XCircle className="w-3.5 h-3.5 mr-1.5" /> Cancel Order</>
+                            )}
+                          </Button>
+                        </div>
+                      )}
+
+                      {/* Cancelled notice */}
+                      {order.cancelledAt && (
+                        <div className="pt-4 border-t border-stone-200 mt-4 flex items-center gap-2 text-sm text-red-600 font-sans">
+                          <XCircle className="w-4 h-4" />
+                          <span>This order was cancelled on {formatDate(order.cancelledAt)}</span>
+                        </div>
                       )}
                     </div>
                   </motion.div>
@@ -439,6 +515,39 @@ const Profile = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Cancel Order Confirmation Dialog */}
+      <AlertDialog open={!!confirmCancelOrderId} onOpenChange={(open) => { if (!open) setConfirmCancelOrderId(null); }}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-serif flex items-center gap-2">
+              <XCircle className="w-5 h-5 text-red-500" />
+              Cancel Order?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="font-sans text-sm leading-relaxed">
+              Are you sure you want to cancel this order? This action cannot be undone. 
+              A refund will be processed to your original payment method and you'll receive a confirmation email.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="font-sans text-sm rounded-full">Keep Order</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (confirmCancelOrderId) {
+                  handleCancelOrder(confirmCancelOrderId);
+                }
+              }}
+              className="bg-red-600 hover:bg-red-700 text-white font-sans text-sm rounded-full"
+            >
+              {cancellingOrderId ? (
+                <><Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Cancelling...</>
+              ) : (
+                "Yes, Cancel Order"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Header Section */}
       <div className="bg-white border-b border-stone-200 pt-16 pb-12">
