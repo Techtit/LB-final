@@ -1,5 +1,6 @@
 import * as React from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "@clerk/clerk-react";
 import { useShopifyProduct, useShopifyProducts } from "@/hooks/useShopifyProducts";
 import { useCartStore } from "@/stores/cartStore";
 import { useWishlist } from "@/hooks/useWishlist";
@@ -17,6 +18,9 @@ const ProductDetail = () => {
   const addItem = useCartStore(state => state.addItem);
   const cartLoading = useCartStore(state => state.isLoading);
   const setIsCartOpen = useCartStore(state => state.setIsCartOpen);
+  const { isSignedIn } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const { toggle: toggleWishlist, isWishlisted: checkWishlisted } = useWishlist();
   const isWishlisted = checkWishlisted(handle || '');
@@ -69,6 +73,11 @@ const ProductDetail = () => {
       quantity: 1,
       selectedOptions: variant.selectedOptions || [],
     });
+    if (!isSignedIn) {
+      const returnUrl = location.pathname + location.search + (location.search ? '&' : '?') + 'open_cart=true';
+      navigate(`/auth?returnTo=${encodeURIComponent(returnUrl)}`);
+      return;
+    }
     const checkoutUrl = useCartStore.getState().getCheckoutUrl();
     if (checkoutUrl) window.open(checkoutUrl, '_blank');
   };

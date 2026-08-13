@@ -1,10 +1,12 @@
 import { SignIn, SignUp } from "@clerk/clerk-react";
 import { useState } from "react";
 import logo from "@/assets/logo.png";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [searchParams] = useSearchParams();
+  const returnTo = searchParams.get("returnTo") || "/";
 
   return (
     <div className="min-h-[70vh] flex items-center justify-center px-4">
@@ -19,7 +21,7 @@ const Auth = () => {
           <SignIn
             routing="hash"
             signUpUrl="/auth"
-            afterSignInUrl="/"
+            fallbackRedirectUrl={returnTo}
             appearance={{
               elements: {
                 rootBox: "w-full",
@@ -31,7 +33,7 @@ const Auth = () => {
           <SignUp
             routing="hash"
             signInUrl="/auth"
-            afterSignUpUrl="/"
+            fallbackRedirectUrl={returnTo}
             appearance={{
               elements: {
                 rootBox: "w-full",

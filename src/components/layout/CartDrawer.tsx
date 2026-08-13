@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Minus, Plus, Trash2, ShoppingBag, ExternalLink, Loader2, Shield } from "lucide-react";
 import { useCartStore } from "@/stores/cartStore";
 import { useEffect } from "react";
+import { useAuth } from "@clerk/clerk-react";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import logo from "@/assets/logo.png";
 import { SectionErrorBoundary } from "@/components/error/SectionErrorBoundary";
 import { SafeImage } from "@/components/ui/SafeImage";
@@ -12,9 +14,28 @@ const CartDrawer = () => {
   const count = totalItems();
   const total = totalPrice();
 
+  const { isSignedIn } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get("open_cart") === "true") {
+      setIsCartOpen(true);
+      searchParams.delete("open_cart");
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setIsCartOpen, setSearchParams]);
+
   useEffect(() => { if (isCartOpen) syncCart(); }, [isCartOpen, syncCart]);
 
   const handleCheckout = () => {
+    if (!isSignedIn) {
+      setIsCartOpen(false);
+      const returnUrl = location.pathname + location.search + (location.search ? '&' : '?') + 'open_cart=true';
+      navigate(`/auth?returnTo=${encodeURIComponent(returnUrl)}`);
+      return;
+    }
     const checkoutUrl = getCheckoutUrl();
     if (checkoutUrl) {
       window.open(checkoutUrl, '_blank');
@@ -94,6 +115,11 @@ const CartDrawer = () => {
                 <span className="font-serif text-2xl text-[#b88645]">₹{total.toFixed(2)}</span>
               </div>
               <p className="text-xs text-muted-foreground text-center italic font-serif">Free shipping on orders above ₹499</p>
+              
+              <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-md p-3 text-center text-xs text-amber-800 dark:text-amber-200 font-medium">
+                <span className="font-bold">NOTE:</span> MAKE SURE TO USE THE same mail id for shopify customer accounts as it will help in order tracking etc.
+              </div>
+
               <Button 
                 className="w-full h-14 bg-gradient-to-r from-[#b88645] to-[#7a5525] hover:opacity-90 text-white font-sans text-sm tracking-widest uppercase shadow-lg shadow-[#b88645]/20 border-0 transition-transform hover:scale-[1.02]" 
                 onClick={handleCheckout} 
