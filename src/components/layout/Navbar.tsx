@@ -13,10 +13,9 @@ const categoryMap: Record<Segment, string[]> = {
   Women: [
     "Earrings",
     "Necklaces",
-    "Bangles",
+    "Bangles & Bracelets",
     "Rings",
     "Hair Accessories",
-    "Bracelets",
     "Premium",
   ],
   Men: [

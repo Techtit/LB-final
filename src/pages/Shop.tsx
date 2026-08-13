@@ -9,7 +9,7 @@ import { Helmet } from "react-helmet-async";
 const categories = [
   { name: "Earrings", slug: "Earrings" },
   { name: "Necklaces", slug: "Necklaces" },
-  { name: "Bangles", slug: "Bangles" },
+  { name: "Bangles & Bracelets", slug: "Bangles & Bracelets" },
   { name: "Rings", slug: "Rings" },
   { name: "Hair Accessories", slug: "Hair Accessories" },
   { name: "Premium", slug: "Premium" },
@@ -35,10 +35,20 @@ const Shop = () => {
   const filtered = useMemo(() => {
     let result = products;
 
-    // 1. Semantic Category Match (e.g. "Earrings")
+    // 1. Semantic Category Match (e.g. "Earrings", "Bangles & Bracelets")
     if (category) {
       const catLower = category.toLowerCase();
-      const regex = new RegExp(`\\b${catLower}\\b`, 'i');
+      
+      let searchTerms = [catLower];
+      if (catLower.includes("bangle") || catLower.includes("bracelet")) {
+        searchTerms = ["bangle", "bangles", "bracelet", "bracelets"];
+      } else if (catLower.includes("&") || catLower.includes("and")) {
+        searchTerms = catLower
+          .split(/&|and/)
+          .map(s => s.trim())
+          .filter(Boolean);
+      }
+
       result = result.filter(p => {
         const node = p.node;
         const pType = node.productType?.toLowerCase() || '';
@@ -46,10 +56,14 @@ const Shop = () => {
         const tags = node.tags || [];
         const description = node.descriptionHtml?.toLowerCase() || '';
         
-        return pType === catLower || 
-               regex.test(title) || 
-               tags.some(t => t.toLowerCase() === catLower) ||
-               regex.test(description);
+        return searchTerms.some(term => {
+          const regex = new RegExp(`\\b${term}\\b`, 'i');
+          return pType === term || 
+                 pType.includes(term) ||
+                 regex.test(title) || 
+                 tags.some(t => t.toLowerCase() === term || t.toLowerCase().includes(term)) ||
+                 regex.test(description);
+        });
       });
     }
 

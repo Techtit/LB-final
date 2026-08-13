@@ -11,7 +11,7 @@ import catPremium from "@/assets/PREMIUM.png";
 const categoryFallbacks: Record<string, string> = {
   Earrings: catEarrings,
   Necklaces: catNecklaces,
-  Bangles: catBangles,
+  "Bangles & Bracelets": catBangles,
   Rings: catRings,
   "Hair Accessories": catHair,
   Premium: catPremium,
@@ -20,7 +20,7 @@ const categoryFallbacks: Record<string, string> = {
 const cats = [
   { name: "Earrings", image: catEarrings, slug: "Earrings", count: "50+" },
   { name: "Necklaces", image: catNecklaces, slug: "Necklaces", count: "30+" },
-  { name: "Bangles", image: catBangles, slug: "Bangles", count: "25+" },
+  { name: "Bangles & Bracelets", image: catBangles, slug: "Bangles & Bracelets", count: "25+" },
   { name: "Rings", image: catRings, slug: "Rings", count: "20+" },
   { name: "Hair Accessories", image: catHair, slug: "Hair Accessories", count: "15+" },
   { name: "Premium", image: catPremium, slug: "Premium", count: "Exquisite" },
@@ -31,8 +31,15 @@ const CategorySection = () => {
 
   const getCategoryImage = (catName: string, defaultImage: string) => {
     if (!products || products.length === 0) return defaultImage;
-    const searchStr = catName.toLowerCase();
-    const regex = new RegExp(`\\b${searchStr}\\b`, 'i');
+    const catLower = catName.toLowerCase();
+    
+    let terms = [catLower];
+    if (catLower.includes("bangle") || catLower.includes("bracelet")) {
+      terms = ["bangle", "bangles", "bracelet", "bracelets"];
+    } else if (catLower.includes("&") || catLower.includes("and")) {
+      terms = catLower.split(/&|and/).map(s => s.trim()).filter(Boolean);
+    }
+
     const product = products.find(p => {
       const node = p.node;
       const pType = node.productType?.toLowerCase() || '';
@@ -40,10 +47,14 @@ const CategorySection = () => {
       const tags = node.tags || [];
       const handle = node.handle?.toLowerCase() || '';
       
-      return pType === searchStr || 
-             tags.some(t => t.toLowerCase() === searchStr) ||
-             regex.test(title) ||
-             regex.test(handle);
+      return terms.some(term => {
+        const regex = new RegExp(`\\b${term}\\b`, 'i');
+        return pType === term || 
+               pType.includes(term) ||
+               tags.some(t => t.toLowerCase() === term || t.toLowerCase().includes(term)) ||
+               regex.test(title) ||
+               regex.test(handle);
+      });
     });
     if (product && product.node.images?.edges?.length > 0) {
       return product.node.images.edges[0].node.url;
