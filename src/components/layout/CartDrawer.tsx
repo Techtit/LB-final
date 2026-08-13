@@ -115,10 +115,6 @@ const CartDrawer = () => {
                 <span className="font-serif text-2xl text-[#b88645]">₹{total.toFixed(2)}</span>
               </div>
               <p className="text-xs text-muted-foreground text-center italic font-serif">Free shipping on orders above ₹499</p>
-              
-              <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-md p-3 text-center text-xs text-amber-800 dark:text-amber-200 font-medium">
-                <span className="font-bold">NOTE:</span> MAKE SURE TO USE THE same mail id for shopify customer accounts as it will help in order tracking etc.
-              </div>
 
               <Button 
                 className="w-full h-14 bg-gradient-to-r from-[#b88645] to-[#7a5525] hover:opacity-90 text-white font-sans text-sm tracking-widest uppercase shadow-lg shadow-[#b88645]/20 border-0 transition-transform hover:scale-[1.02]" 

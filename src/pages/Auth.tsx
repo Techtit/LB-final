@@ -11,10 +11,13 @@ const Auth = () => {
   return (
     <div className="min-h-[70vh] flex items-center justify-center px-4">
       <div className="w-full max-w-sm space-y-6">
-        <div className="text-center">
+        <div className="text-center space-y-2">
           <Link to="/">
-            <img src={logo} alt="Lalisa Belle" className="h-14 mx-auto mb-4" />
+            <img src={logo} alt="Lalisa Belle" className="h-14 mx-auto mb-2" />
           </Link>
+          <p className="text-xs text-muted-foreground/75 font-sans leading-relaxed max-w-xs mx-auto px-2">
+            ✨ <span className="font-medium text-muted-foreground/90">Tip:</span> Use the same email address here as at checkout for seamless order tracking and updates.
+          </p>
         </div>
 
         {isLogin ? (
