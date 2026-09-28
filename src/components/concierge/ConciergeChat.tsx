@@ -4,7 +4,8 @@ import { api } from "../../../convex/_generated/api";
 import { Loader2, ExternalLink, Send } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ConciergeProductCard from "./ConciergeProductCard";
-import type { ProductResult, TicketResult } from "../../../convex/concierge";
+import ConciergeOrderCard from "./ConciergeOrderCard";
+import type { ProductResult, OrderResult, TicketResult } from "../../../convex/concierge";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -13,6 +14,7 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   products?: ProductResult[];
+  orders?: OrderResult[];
   ticket?: TicketResult;
   isError?: boolean;
 }
@@ -80,6 +82,15 @@ const MessageBubble = ({
                 product={product}
                 onNavigate={onNavigate}
               />
+            ))}
+          </div>
+        )}
+
+        {/* Order cards */}
+        {message.orders && message.orders.length > 0 && (
+          <div className="w-full flex flex-col gap-2 mt-1">
+            {message.orders.map((order) => (
+              <ConciergeOrderCard key={order.id} order={order} />
             ))}
           </div>
         )}
@@ -172,6 +183,7 @@ const ConciergeChat = ({ pendingMessage, onMessageConsumed, onNavigate }: Concie
           role: "assistant",
           content: response.reply,
           products: response.products,
+          orders: response.orders,
           ticket: response.ticket,
         };
 
