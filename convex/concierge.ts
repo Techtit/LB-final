@@ -485,7 +485,7 @@ export const chat = action({
     }
 
     const model = new ChatGroq({
-      model: "llama-3.1-70b-versatile",
+      model: "llama-3.3-70b-versatile",
       apiKey,
       maxTokens: 1024,
       temperature: 0.3,
