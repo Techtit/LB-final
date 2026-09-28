@@ -546,6 +546,24 @@ function extractTicketResult(messages: BaseMessage[]): TicketResult | null {
   return null;
 }
 
+// ─── Intent Router ────────────────────────────────────────────────────────────
+// Handles clear-cut queries directly without burning LLM tokens.
+
+const ORDER_INTENT = /\b(my order|my orders|order status|order history|where is my|track|tracking|delivery|shipped|dispatch)\b/i;
+const POLICY_INTENT = /\b(return|refund|exchange|shipping time|how long|payment|cod|cash on delivery|care|tarnish|warranty|location|address|contact|whatsapp|email)\b/i;
+const COMPLAINT_INTENT = /\b(complaint|complain|damaged|broken|wrong product|missing|not received|defective|problem with my)\b/i;
+const GREETING_INTENT = /^\s*(hi|hello|hey|hii|good morning|good evening|what can you do|help)\s*[!?.]*\s*$/i;
+
+type Intent = 'orders' | 'policy' | 'complaint' | 'greeting' | 'llm';
+
+function detectIntent(message: string): Intent {
+  if (GREETING_INTENT.test(message)) return 'greeting';
+  if (ORDER_INTENT.test(message)) return 'orders';
+  if (COMPLAINT_INTENT.test(message)) return 'complaint';
+  if (POLICY_INTENT.test(message)) return 'policy';
+  return 'llm';
+}
+
 // ─── Exported Convex Action ───────────────────────────────────────────────────
 
 export const chat = action({
@@ -558,24 +576,66 @@ export const chat = action({
     ),
   },
   handler: async (ctx, args): Promise<ConciergeResponse> => {
-    // Get authenticated user identity (server-side — never trust client-supplied IDs)
     const identity = await ctx.auth.getUserIdentity();
     const userEmail = identity?.email ?? null;
     const tokenIdentifier = identity?.tokenIdentifier ?? null;
 
+    const lastMsg = args.messages[args.messages.length - 1]?.content ?? "";
+    const intent = detectIntent(lastMsg);
+
+    // ── Greeting: instant, no API ────────────────────────────────────────────
+    if (intent === 'greeting') {
+      return {
+        reply: "Hi! I'm LB Concierge, your personal jewellery assistant. I can help you find jewellery, check your orders, answer policy questions, or raise a support request. What can I do for you?",
+      };
+    }
+
+    // ── Orders: fetch directly, zero LLM tokens ──────────────────────────────
+    if (intent === 'orders') {
+      if (!userEmail) {
+        return { reply: "Please sign in to your account first so I can pull up your orders." };
+      }
+      try {
+        const orders = await fetchUserOrders(userEmail);
+        if ('error' in orders) {
+          return { reply: "I couldn't fetch your orders right now. Please try again or check your profile page directly." };
+        }
+        if (orders.length === 0) {
+          return { reply: "You haven't placed any orders yet. Browse our collection and find something you love!" };
+        }
+        return {
+          reply: `Here are your ${orders.length} recent orders! Tap Track Order on any card to follow your delivery.`,
+          orders,
+        };
+      } catch {
+        return { reply: "Something went wrong. Please try again or visit your profile page." };
+      }
+    }
+
+    // ── Policy: keyword lookup, zero LLM tokens ──────────────────────────────
+    if (intent === 'policy') {
+      const results = searchKnowledge(lastMsg);
+      if (results.length > 0) {
+        return { reply: results[0].content };
+      }
+      return {
+        reply: "For any policy questions you can reach us on WhatsApp at 9211770999 or email support@lalisabelle.com and we'll get back to you quickly.",
+      };
+    }
+
+    // ── Products / Complaints / Complex: use LLM ─────────────────────────────
     const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) {
-      return { reply: "LB Concierge is not configured yet. Please contact support." };
+      return { reply: "LB Concierge is not fully set up yet. Please contact support." };
     }
 
     const model = new ChatGroq({
       model: "qwen/qwen3.8-27b",
       apiKey,
-      maxTokens: 1024,
+      maxTokens: 512,   // Free tier OTPM limit is 1000 — stay well under it
       temperature: 0.3,
     });
 
-    // Closure variable — getMyOrders writes here directly, no regex needed
     let capturedOrders: OrderResult[] | null = null;
     const tools = createTools(ctx, userEmail, tokenIdentifier, (o) => { capturedOrders = o; });
 
@@ -585,8 +645,8 @@ export const chat = action({
       stateModifier: SYSTEM_PROMPT,
     });
 
-    // Convert to LangChain messages (cap at last 20 to control context window)
-    const recentMessages = args.messages.slice(-20);
+    // Cap at last 8 messages to keep context small
+    const recentMessages = args.messages.slice(-8);
     const lcMessages = recentMessages.map((m) =>
       m.role === "user" ? new HumanMessage(m.content) : new AIMessage(m.content)
     );
@@ -597,48 +657,39 @@ export const chat = action({
     } catch (err) {
       console.error("[concierge.chat] Agent error:", err);
       return {
-        reply:
-          "I'm having trouble right now. Please try again, or reach us on WhatsApp at 9211770999.",
+        reply: "I'm having a bit of trouble right now. Please try again, or reach us on WhatsApp at 9211770999.",
       };
     }
 
-    // Extract final text reply
-    const lastMessage = result.messages[result.messages.length - 1];
+    const lastAgentMessage = result.messages[result.messages.length - 1];
     let reply =
-      typeof lastMessage.content === "string"
-        ? lastMessage.content
-        : JSON.stringify(lastMessage.content);
+      typeof lastAgentMessage.content === "string"
+        ? lastAgentMessage.content
+        : JSON.stringify(lastAgentMessage.content);
 
-    // Clean markers from visible reply
+    // Strip markers and markdown
     reply = reply
       .replace(/\[PRODUCTS:\{.*?\}\]/gs, "")
       .replace(/\[ORDERS:\{[\s\S]*?\}\]/gs, "")
-      // Strip any leftover markdown the model might sneak in
       .replace(/\*\*(.*?)\*\*/g, "$1")
       .replace(/\*(.*?)\*/g, "$1")
+      .replace(/ — /g, ", ")
       .trim();
 
-    // Extract structured data
     const productHandles = extractProductHandles(result.messages);
     const ticket = extractTicketResult(result.messages);
-    // Orders come from the reliable closure capture, not from regex
     const orders = capturedOrders ?? undefined;
 
-    // Fetch full product data if agent recommended products
     let products: ProductResult[] | undefined;
     if (productHandles && productHandles.length > 0) {
       try {
         products = await fetchShopifyProductsByHandles(productHandles);
       } catch {
-        // Products failed to fetch, reply still goes through
+        // Products fetch failed, reply still goes through
       }
     }
 
-    return {
-      reply,
-      products,
-      orders,
-      ticket: ticket ?? undefined,
-    };
+    return { reply, products, orders, ticket: ticket ?? undefined };
   },
 });
+
